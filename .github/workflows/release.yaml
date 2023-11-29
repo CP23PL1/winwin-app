@@ -1,0 +1,31 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: yarn
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@cp23pl1'
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          GH_NPM_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
+
+      - name: Build app
+        run: eas build --platform android --local --output ./winwin.apk
