@@ -1,3 +1,5 @@
+name: Build and Release Android Apk
+
 on:
   workflow_dispatch:
 
@@ -25,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
         env:
-          GH_NPM_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
 
       - name: Build app
         run: eas build --platform android --local --output ./winwin.apk
