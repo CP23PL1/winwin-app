@@ -31,3 +31,9 @@ jobs:
 
       - name: Build app
         run: eas build --platform android --local --output ./winwin.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: winwin.apk
+          path: winwin.apk
