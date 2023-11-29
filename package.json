@@ -12,10 +12,12 @@
   "dependencies": {
     "@cp23pl1/winwin-client-sdk": "^1.2.0",
     "@react-native-community/netinfo": "9.3.10",
+    "@react-navigation/native-stack": "^6.9.17",
     "@shopify/flash-list": "1.4.3",
     "expo": "~49.0.15",
     "expo-constants": "~14.4.2",
     "expo-font": "~11.4.0",
+    "expo-linear-gradient": "~12.3.0",
     "expo-linking": "~5.0.2",
     "expo-location": "~16.1.0",
     "expo-router": "^2.0.0",

@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router'
 import React from 'react'
-import { View, Text } from 'react-native-ui-lib'
+import { View, Text, Colors } from 'react-native-ui-lib'
 import { useLocation } from '../../hooks/useLocation'
 import { useGetServiceSpots } from '../../apis/service-spots'
 import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
@@ -16,17 +16,17 @@ export default function ServiceSpots() {
     RADIUS
   )
   return (
-    <View>
+    <View padding-15>
       <Stack.Screen
         options={{
           title: 'วินมอเตอร์ไซค์'
         }}
       />
-      <View flex row spread>
-        <Text text70>ระยะ {RADIUS / 1000} กม.</Text>
-        <Text text70>ทั้งหมด {serviceSpots?.length || 0} แห่ง</Text>
+      <View row spread>
+        <Text caption>ระยะ {RADIUS / 1000} กม.</Text>
+        <Text caption>ทั้งหมด {serviceSpots?.length || 0} แห่ง</Text>
       </View>
-      <ServiceSpotList items={serviceSpots} radius={RADIUS} />
+      <ServiceSpotList items={serviceSpots} />
     </View>
   )
 }
