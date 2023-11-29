@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 
 const serviceSpotsApi = new ServiceSpotsApi({
-  basePath: 'https://capstone23.sit.kmutt.ac.th/pl1',
+  basePath: process.env.EXPO_PUBLIC_API_URL,
   isJsonMime: (mime) => mime.includes('application/json')
 })
 
@@ -21,6 +21,7 @@ export const useGetServiceSpots = (
     queryKey: ['service-spots'],
     queryFn: () =>
       serviceSpotsApi.findAll(lat!, lng!, radius!).then((res) => res.data),
+    staleTime: 10000, // 10 seconds
     enabled
   })
 }

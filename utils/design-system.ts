@@ -1,7 +1,15 @@
-import { Spacings, ThemeManager, Typography } from 'react-native-ui-lib'
+import { Spacings, ThemeManager, Typography, Colors } from 'react-native-ui-lib'
 
 export class DesignSystem {
   static setup() {
+    Colors.loadDesignTokens({
+      primaryColor: '#FDA84B'
+    })
+
+    Colors.loadColors({
+      lightGray: '#DCDCDC'
+    })
+
     Typography.loadTypographies({
       h1: { fontSize: 32, fontFamily: 'NotoSansThai' },
       h2: { fontSize: 26, fontFamily: 'NotoSansThai' },
