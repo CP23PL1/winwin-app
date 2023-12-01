@@ -3,14 +3,17 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import { View, Text, Colors, TouchableOpacity } from 'react-native-ui-lib'
 import { FontAwesome5, Entypo } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
 
 type Props = {
   serviceSpot: ServiceSpotDto
+  onPress?: ServiceSpotListItemPressHandler
 }
 
-function ServiceSpotListItem({ serviceSpot }: Props) {
-  const router = useRouter()
+export type ServiceSpotListItemPressHandler = (
+  serviceSpot: ServiceSpotDto
+) => void
+
+function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
   const getDistanceText = (distance: number) => {
     if (distance < 1000) {
       return `${Math.floor(distance)} เมตร`
@@ -19,8 +22,9 @@ function ServiceSpotListItem({ serviceSpot }: Props) {
   }
 
   const handlePress = () => {
-    router.push(`/service-spots/${serviceSpot.id}`)
+    onPress?.(serviceSpot)
   }
+
   return (
     <TouchableOpacity
       onPress={handlePress}
