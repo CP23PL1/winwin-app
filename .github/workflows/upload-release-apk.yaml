@@ -1,0 +1,47 @@
+name: Upload Release APK asset
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@cp23pl1'
+          cache: yarn
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
+
+      - name: Build app
+        run: |
+          eas build --platform android --local --output ./winwin_${{ github.ref_name }}.apk
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./winwin_${{ github.ref_name }}.apk
+          asset_name: winwin_${{ github.ref_name }}.apk
+          asset_content_type: application/vnd.android.package-archive
