@@ -3,7 +3,7 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import { View, Text, LoaderScreen } from 'react-native-ui-lib'
 import { useGetServiceSpotById } from '../../apis/service-spots'
-import MapView, { MapMarker } from 'react-native-maps'
+import MapView, { MapMarker, PROVIDER_GOOGLE } from 'react-native-maps'
 
 type Params = {
   slug: string
@@ -22,6 +22,7 @@ function ServiceSpotDetail() {
     <View flex-1>
       <Stack.Screen options={{ title: serviceSpot?.name }} />
       <MapView
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         region={{
           latitude: (serviceSpot?.coords as any)?.coordinates[1] || 0,
