@@ -10,62 +10,18 @@ on:
       - '*.x' # maintenance releases branches
 
 jobs:
-  versioning:
+  release:
     runs-on: ubuntu-latest
-    permissions: write-all
     outputs:
       new_release_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Semantic Versioning
+      - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
-        with:
-          ci: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build:
-    runs-on: ubuntu-latest
-    needs: versioning
-    if: needs.versioning.outputs.new_release_version != ''
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@cp23pl1'
-          cache: yarn
-
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
-
-      - name: Build app
-        run: |
-          eas build --platform android --local --output ./winwin-${{ needs.versioning.outputs.new_release_version }}.apk
-
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          draft: false
-          prerelease: ${{ startsWith(github.ref, 'refs/tags/master') == false }}
-          release_name: ${{ needs.versioning.outputs.new_release_version }}
-          tag_name: ${{ needs.versioning.outputs.new_release_version }}
-          body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
