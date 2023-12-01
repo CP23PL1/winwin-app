@@ -12,6 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Remove .npmrc file and use setup node action to setup node with the correct registry
+      - name: Remove .npmrc
+        run: rm -f .npmrc
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
