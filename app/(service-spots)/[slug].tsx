@@ -1,9 +1,10 @@
 import { Stack, useLocalSearchParams } from 'expo-router'
-import React from 'react'
-import { StyleSheet } from 'react-native'
-import { View, Text, LoaderScreen } from 'react-native-ui-lib'
+import React, { useCallback, useMemo } from 'react'
+import { Alert, Linking, StyleSheet } from 'react-native'
+import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
 import { useGetServiceSpotById } from '../../apis/service-spots'
 import MapView, { MapMarker, PROVIDER_GOOGLE } from 'react-native-maps'
+import { URLSearchParams } from 'react-native-url-polyfill'
 
 type Params = {
   slug: string
@@ -13,6 +14,26 @@ function ServiceSpotDetail() {
   const { slug } = useLocalSearchParams<Params>()
 
   const { data: serviceSpot } = useGetServiceSpotById(parseInt(slug))
+
+  const shouldDisableRouteButton = useMemo(() => {
+    return !serviceSpot?.coords.lat || !serviceSpot?.coords.lng
+  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng])
+
+  const openRouteViewInMapApplication = useCallback(async () => {
+    const searchParams = new URLSearchParams()
+    searchParams.append('api', '1')
+    searchParams.append(
+      'destination',
+      `${serviceSpot?.coords.lat},${serviceSpot?.coords.lng}`
+    )
+    const url = `https://www.google.com/maps/dir/?${searchParams.toString()}`
+    const supported = await Linking.canOpenURL(url)
+
+    if (!supported) {
+      Alert.alert('ไม่สามารถเปิดแผนที่ได้')
+    }
+    await Linking.openURL(url)
+  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng])
 
   if (!serviceSpot) {
     return <LoaderScreen />
@@ -25,8 +46,8 @@ function ServiceSpotDetail() {
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         region={{
-          latitude: (serviceSpot?.coords as any)?.coordinates[1] || 0,
-          longitude: (serviceSpot?.coords as any)?.coordinates[0] || 0,
+          latitude: serviceSpot.coords.lat || 0,
+          longitude: serviceSpot.coords.lng || 0,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421
         }}
@@ -37,13 +58,18 @@ function ServiceSpotDetail() {
         <MapMarker
           key={serviceSpot?.id}
           coordinate={{
-            latitude: (serviceSpot?.coords as any)?.coordinates[1] || 0,
-            longitude: (serviceSpot?.coords as any)?.coordinates[0] || 0
+            latitude: serviceSpot?.coords.lat || 0,
+            longitude: serviceSpot.coords.lng || 0
           }}
         />
       </MapView>
-      <View>
-        <Text>{serviceSpot?.name}</Text>
+      <View padding-10 right>
+        <Button
+          onPress={openRouteViewInMapApplication}
+          disabled={shouldDisableRouteButton}
+        >
+          <Text white>เส้นทาง</Text>
+        </Button>
       </View>
     </View>
   )
