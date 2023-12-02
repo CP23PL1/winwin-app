@@ -5,16 +5,15 @@ on:
     types:
       - created
 
+env:
+  OUTPUT_APK: winwin_${{ github.ref_name }}.apk
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Remove .npmrc file and use setup node action to setup node with the correct registry
-      - name: Remove .npmrc
-        run: rm -f .npmrc
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -35,9 +34,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_TOKEN }}
 
-      - name: Build app
+      - name: Build Android Apk
         run: |
-          eas build --platform android --local --output ./winwin_${{ github.ref_name }}.apk
+          eas build --platform android --local --output ./${{ env.OUTPUT_APK }}
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -46,6 +45,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./winwin_${{ github.ref_name }}.apk
-          asset_name: winwin_${{ github.ref_name }}.apk
+          asset_path: ./${{ env.OUTPUT_APK }}
+          asset_name: ${{ env.OUTPUT_APK }}
           asset_content_type: application/vnd.android.package-archive
