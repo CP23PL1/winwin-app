@@ -5,7 +5,6 @@ node_modules/
 
 android
 ios
-.bash_aliases
 
 # Expo
 .expo/
