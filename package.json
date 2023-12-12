@@ -10,7 +10,7 @@
     "prebuild": "expo prebuild"
   },
   "dependencies": {
-    "@cp23pl1/winwin-client-sdk": "^1.3.0",
+    "@cp23pl1/winwin-client-sdk": "^1.6.2",
     "@react-native-community/netinfo": "9.3.10",
     "@react-navigation/native-stack": "^6.9.17",
     "@shopify/flash-list": "1.4.3",

@@ -1,4 +1,4 @@
-import { ServiceSpotsApi } from '@cp23pl1/winwin-client-sdk'
+import { ServiceSpotsApi, AddressesApi } from '@cp23pl1/winwin-client-sdk'
 import { useMemo } from 'react'
 import { useQuery } from 'react-query'
 

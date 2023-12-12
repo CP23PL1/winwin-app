@@ -5,6 +5,7 @@ import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
 import { useGetServiceSpotById } from '../../apis/service-spots'
 import MapView, { MapMarker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { URLSearchParams } from 'react-native-url-polyfill'
+import { useGetDriverByUid } from '../../apis/drivers'
 
 type Params = {
   slug: string
@@ -14,6 +15,9 @@ function ServiceSpotDetail() {
   const { slug } = useLocalSearchParams<Params>()
 
   const { data: serviceSpot } = useGetServiceSpotById(parseInt(slug))
+  const { data: serviceSpotOwner } = useGetDriverByUid(
+    serviceSpot?.serviceSpotOwnerUid
+  )
 
   const shouldDisableRouteButton = useMemo(() => {
     return !serviceSpot?.coords.lat || !serviceSpot?.coords.lng
@@ -58,18 +62,46 @@ function ServiceSpotDetail() {
         <MapMarker
           key={serviceSpot?.id}
           coordinate={{
-            latitude: serviceSpot?.coords.lat || 0,
+            latitude: serviceSpot.coords.lat || 0,
             longitude: serviceSpot.coords.lng || 0
           }}
         />
       </MapView>
-      <View padding-10 right>
-        <Button
-          onPress={openRouteViewInMapApplication}
-          disabled={shouldDisableRouteButton}
-        >
-          <Text white>เส้นทาง</Text>
-        </Button>
+      <View row padding-10 width="100%">
+        <View flex>
+          <View marginV-10>
+            <Text h4>ที่อยู่</Text>
+          </View>
+          <Text>
+            {serviceSpot.addressLine1} {serviceSpot?.addressLine2 || ''}{' '}
+            {
+              // @ts-ignore
+              serviceSpot.address.nameTH
+            }{' '}
+            {
+              // @ts-ignore
+              serviceSpot.address.district.nameTH
+            }{' '}
+            {
+              // @ts-ignore
+              serviceSpot.address.district.province.nameTH
+            }
+          </Text>
+        </View>
+        <View right>
+          <Button
+            onPress={openRouteViewInMapApplication}
+            disabled={shouldDisableRouteButton}
+          >
+            <Text white>เส้นทาง</Text>
+          </Button>
+        </View>
+      </View>
+      <View padding-10 width="100%">
+        <Text h4>หัวหน้าวิน</Text>
+        <Text>
+          {serviceSpotOwner?.firstName} {serviceSpotOwner?.lastName}
+        </Text>
       </View>
     </View>
   )

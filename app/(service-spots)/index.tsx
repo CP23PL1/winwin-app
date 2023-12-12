@@ -7,7 +7,7 @@ import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
 import { ServiceSpotListItemPressHandler } from '../../components/service-spots/ServiceSpotListItem'
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
 
-const RADIUS = 5000
+const RADIUS = 2000
 
 export default function ServiceSpots() {
   const router = useRouter()
