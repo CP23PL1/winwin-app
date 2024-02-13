@@ -10,10 +10,10 @@
     "prebuild": "expo prebuild"
   },
   "dependencies": {
-    "@cp23pl1/winwin-client-sdk": "^1.6.2",
     "@react-native-community/netinfo": "9.3.10",
     "@react-navigation/native-stack": "^6.9.17",
     "@shopify/flash-list": "1.4.3",
+    "axios": "^1.6.7",
     "dotenv": "^16.3.1",
     "expo": "~49.0.15",
     "expo-constants": "~14.4.2",
