@@ -11,6 +11,7 @@ export type ServiceSpot = {
   coords: Coordinate;
   priceRateImageUrl: string;
   serviceSpotOwner: Driver;
+  distance?: number;
 };
 
 export type Coordinate = {

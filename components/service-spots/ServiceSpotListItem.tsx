@@ -1,16 +1,16 @@
-import { ServiceSpotDto } from "@cp23pl1/winwin-client-sdk";
 import React from "react";
 import { StyleSheet } from "react-native";
 import { View, Text, Colors, TouchableOpacity } from "react-native-ui-lib";
 import { FontAwesome5, Entypo } from "@expo/vector-icons";
+import { ServiceSpot } from "../../apis/service-spots/type";
 
 type Props = {
-  serviceSpot: ServiceSpotDto;
+  serviceSpot: ServiceSpot;
   onPress?: ServiceSpotListItemPressHandler;
 };
 
 export type ServiceSpotListItemPressHandler = (
-  serviceSpot: ServiceSpotDto
+  serviceSpot: ServiceSpot
 ) => void;
 
 function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
@@ -45,7 +45,7 @@ function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
           </View>
           <View>
             <Text h5>{serviceSpot.name}</Text>
-            <Text caption>{getDistanceText(serviceSpot.distance)}</Text>
+            <Text caption>{getDistanceText(serviceSpot.distance!)}</Text>
           </View>
         </View>
         <Entypo name="chevron-thin-right" size={24} />
