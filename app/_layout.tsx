@@ -1,37 +1,37 @@
-import { useFonts } from 'expo-font'
-import { SplashScreen, Stack, useNavigation } from 'expo-router'
-import React, { useEffect } from 'react'
-import { QueryClientProvider } from '../providers/query-client'
-import 'react-native-url-polyfill/auto'
-import { DesignSystem } from '../utils/design-system'
-import { StyleSheet } from 'react-native'
-import { Entypo } from '@expo/vector-icons'
-import { Colors, LoaderScreen, Text } from 'react-native-ui-lib'
+import { useFonts } from "expo-font";
+import { SplashScreen, Stack, useNavigation } from "expo-router";
+import React, { useEffect } from "react";
+import { QueryClientProvider } from "../providers/query-client";
+import "react-native-url-polyfill/auto";
+import { DesignSystem } from "../utils/design-system";
+import { StyleSheet } from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import { Colors, LoaderScreen, Text } from "react-native-ui-lib";
 
-DesignSystem.setup()
-SplashScreen.preventAutoHideAsync()
+DesignSystem.setup();
+SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
   const [fontsLoaded, error] = useFonts({
-    NotoSansThai: require('../assets/fonts/NotoSansThai-Regular.ttf'),
-    NotoSansThaiBold: require('../assets/fonts/NotoSansThai-Bold.ttf')
-  })
+    NotoSansThai: require("../assets/fonts/NotoSansThai-Regular.ttf"),
+    NotoSansThaiBold: require("../assets/fonts/NotoSansThai-Bold.ttf"),
+  });
 
   useEffect(() => {
     if (error) {
-      throw error
+      throw error;
     }
-  }, [error])
+  }, [error]);
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hideAsync();
     }
-  }, [fontsLoaded])
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return <LoaderScreen />
+    return <LoaderScreen />;
   }
 
   return (
@@ -53,22 +53,24 @@ function RootLayout() {
             </Text>
           ),
           headerStyle: {
-            backgroundColor: Colors.$backgroundPrimaryHeavy
+            backgroundColor: Colors.$backgroundPrimaryHeavy,
           },
           headerBackVisible: false,
-          headerTitleAlign: 'center',
+          headerTitleAlign: "center",
           headerShadowVisible: false,
-          contentStyle: [styles.container]
+          statusBarTranslucent: true,
+          navigationBarHidden: true,
+          contentStyle: [styles.container],
         }}
       />
     </QueryClientProvider>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F0F0F0'
-  }
-})
+    backgroundColor: "#F0F0F0",
+  },
+});
 
-export default RootLayout
+export default RootLayout;

@@ -36,5 +36,19 @@ export class DesignSystem {
     ThemeManager.setComponentTheme("Text", () => ({
       body: true,
     }));
+
+    ThemeManager.setComponentTheme("Button", (props: any) => {
+      const defaultProps = {
+        backgroundColor: Colors.primaryColor,
+        width: "100%",
+      };
+
+      if (props.none) {
+        defaultProps.backgroundColor = Colors.transparent;
+        defaultProps.width = "0%";
+      }
+
+      return defaultProps;
+    });
   }
 }
