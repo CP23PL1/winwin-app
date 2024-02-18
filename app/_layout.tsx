@@ -1,12 +1,11 @@
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack, useNavigation } from "expo-router";
+import { Slot, SplashScreen, useNavigation } from "expo-router";
 import React, { useEffect } from "react";
 import { QueryClientProvider } from "../providers/query-client";
 import "react-native-url-polyfill/auto";
 import { DesignSystem } from "../utils/design-system";
-import { StyleSheet } from "react-native";
-import { Entypo } from "@expo/vector-icons";
-import { Colors, LoaderScreen, Text } from "react-native-ui-lib";
+import { LoaderScreen } from "react-native-ui-lib";
+import { Auth0Provider } from "react-native-auth0";
 
 DesignSystem.setup();
 SplashScreen.preventAutoHideAsync();
@@ -36,41 +35,14 @@ function RootLayout() {
 
   return (
     <QueryClientProvider>
-      <Stack
-        screenOptions={{
-          headerLeft: (props) =>
-            props.canGoBack && (
-              <Entypo
-                name="chevron-thin-left"
-                size={24}
-                color="white"
-                onPress={navigation.goBack}
-              />
-            ),
-          headerTitle: (props) => (
-            <Text h4 white>
-              {props.children}
-            </Text>
-          ),
-          headerStyle: {
-            backgroundColor: Colors.$backgroundPrimaryHeavy,
-          },
-          headerBackVisible: false,
-          headerTitleAlign: "center",
-          headerShadowVisible: false,
-          statusBarTranslucent: true,
-          navigationBarHidden: true,
-          contentStyle: [styles.container],
-        }}
-      />
+      <Auth0Provider
+        domain={process.env.EXPO_PUBLIC_AUTH0_DOMAIN!}
+        clientId={process.env.EXPO_PUBLIC_AUTH0_CLIENT_ID!}
+      >
+        <Slot />
+      </Auth0Provider>
     </QueryClientProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#F0F0F0",
-  },
-});
 
 export default RootLayout;

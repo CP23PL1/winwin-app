@@ -1,26 +1,37 @@
 import { useEffect, useState } from "react";
 import * as Location from "expo-location";
-import { Alert } from "react-native";
+import { Platform } from "react-native";
 
 export function useLocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+  const [error, setError] = useState("");
 
-  const getCurrentLocation = async () => {
+  const getCurrentPositionAsync = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permission to access location was denied");
-      return;
+      throw new Error("Permission to access location was denied");
     }
+    console.log("Permission granted");
+    console.log("Getting current location");
+    const location = await Location.getCurrentPositionAsync({
+      accuracy:
+        Platform.OS === "android"
+          ? Location.Accuracy.Lowest
+          : Location.Accuracy.Low,
+    });
+    console.log("Got current location");
+    console.log(
+      `Location: ${location.coords.latitude}, ${location.coords.longitude}`
+    );
 
-    const location = await Location.getCurrentPositionAsync();
-    setLocation(location);
+    return location;
   };
 
   useEffect(() => {
-    getCurrentLocation();
+    getCurrentPositionAsync().then(setLocation).catch(setError);
   }, []);
 
-  return location;
+  return { location, error };
 }

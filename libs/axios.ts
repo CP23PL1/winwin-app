@@ -1,10 +1,26 @@
 import axios from "axios";
+import auth0 from "./auth0";
 
-export const axiosInstance = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+const baseURL = process.env.EXPO_PUBLIC_API_URL;
+console.log(baseURL);
+
+const axiosInstance = axios.create({
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-console.log(process.env.EXPO_PUBLIC_API_URL);
+axiosInstance.interceptors.request.use(async (config) => {
+  try {
+    const credential = await auth0.credentialsManager.getCredentials();
+    if (credential.accessToken) {
+      config.headers.Authorization = `Bearer ${credential.accessToken}`;
+    }
+    return config;
+  } catch (error) {
+    return config;
+  }
+});
+
+export default axiosInstance;

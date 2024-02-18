@@ -12,20 +12,25 @@ const RADIUS = 2000;
 
 export default function ServiceSpots() {
   const router = useRouter();
-  const currentLocation = useLocation();
+  const { location } = useLocation();
 
   const [refreshing, setRefreshing] = useState(false);
 
-  const { data: serviceSpots, refetch } = useQuery(["service-spots"], () =>
-    serviceSpotsApi.getNearbyServiceSpots({
-      lat: currentLocation?.coords.latitude,
-      lng: currentLocation?.coords.longitude,
-      radius: RADIUS,
-    })
+  const { data: serviceSpots, refetch } = useQuery(
+    ["service-spots"],
+    () =>
+      serviceSpotsApi.getNearbyServiceSpots({
+        lat: location?.coords.latitude,
+        lng: location?.coords.longitude,
+        radius: RADIUS,
+      }),
+    {
+      enabled: !!location,
+    }
   );
 
   const handleItemPress: ServiceSpotListItemPressHandler = (serviceSpot) => {
-    router.push(`/(service-spots)/${serviceSpot.id}`);
+    router.push(`/(protected)/service-spots/${serviceSpot.id}`);
   };
 
   const onRefresh = useCallback(async () => {

@@ -7,23 +7,15 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import {
-  View,
-  Text,
-  LoaderScreen,
-  Button,
-  Image,
-  Colors,
-} from "react-native-ui-lib";
+import { View, Text, LoaderScreen, Button, Image } from "react-native-ui-lib";
 import MapView, { MapMarker, PROVIDER_GOOGLE } from "react-native-maps";
 import { URLSearchParams } from "react-native-url-polyfill";
 import { useQuery } from "react-query";
-import { serviceSpotsApi } from "../../apis/service-spots";
+import { serviceSpotsApi } from "../../../apis/service-spots";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Carousel from "react-native-reanimated-carousel";
-import ImageViewerModal from "../../components/ImageViewerModal";
-import ShowModal from "../../components/showModal";
+import ImageViewerModal from "../../../components/ImageViewerModal";
+import ShowModal from "../../../components/showModal";
 
 type Params = {
   slug: string;
@@ -68,7 +60,6 @@ function ServiceSpotDetail() {
   if (!serviceSpot) {
     return <LoaderScreen />;
   }
-  console.log(serviceSpot.serviceSpotOwner);
 
   return (
     <View flex-1 height="100%">
