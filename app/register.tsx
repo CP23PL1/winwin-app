@@ -1,56 +1,60 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, TextField, View } from "react-native-ui-lib";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import TextFieldError from "../components/TextFieldError";
-import { usersApi } from "../apis/users";
-import { useAuth0 } from "react-native-auth0";
-import { useRouter } from "expo-router";
-import { useQueryClient } from "react-query";
+import React from 'react'
+import { useForm, Controller } from 'react-hook-form'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { Button, Text, TextField, View } from 'react-native-ui-lib'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
+import TextFieldError from '../components/TextFieldError'
+import { usersApi } from '../apis/users'
+import { useAuth0 } from 'react-native-auth0'
+import { useRouter } from 'expo-router'
+import { useQueryClient } from 'react-query'
+import { Alert } from 'react-native'
 
 const validationSchema = yup.object().shape({
   email: yup.string().email().required(),
   firstName: yup.string().required(),
-  lastName: yup.string().required(),
-});
+  lastName: yup.string().required()
+})
 
 export default function RegisterScreen() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { user } = useAuth0();
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const { user } = useAuth0()
   const {
-    formState: { errors },
+    formState: { errors, isSubmitting },
     control,
-    handleSubmit,
+    handleSubmit
   } = useForm({
-    resolver: yupResolver(validationSchema),
-  });
+    resolver: yupResolver(validationSchema)
+  })
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!user?.name) return console.error("Phone number is required");
+    if (!user?.name) {
+      Alert.alert('กรุณาเข้าสู่ระบบก่อน')
+      return
+    }
     try {
       await usersApi.createUser({
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        phoneNumber: user?.name,
-      });
-      router.replace("/(protected)/");
-      queryClient.invalidateQueries(["user-info"]);
+        phoneNumber: user?.name
+      })
+      await queryClient.invalidateQueries(['user-info'])
+      router.replace('/(protected)/')
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
-  });
+  })
 
   return (
     <SafeAreaView
       style={{
-        justifyContent: "space-between",
-        height: "100%",
+        justifyContent: 'space-between',
+        height: '100%',
         padding: 24,
-        gap: 20,
+        gap: 20
       }}
     >
       <View centerV gap-20 height="100%">
@@ -105,8 +109,13 @@ export default function RegisterScreen() {
           />
           <TextFieldError errorMessage={errors.lastName?.message} />
         </View>
-        <Button marginT-20 label="ลงทะเบียน" onPress={onSubmit} />
+        <Button
+          marginT-20
+          label="ลงทะเบียน"
+          onPress={onSubmit}
+          disabled={isSubmitting}
+        />
       </View>
     </SafeAreaView>
-  );
+  )
 }

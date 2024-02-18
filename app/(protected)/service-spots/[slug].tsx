@@ -1,71 +1,68 @@
-import { Stack, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import { Stack, useLocalSearchParams } from 'expo-router'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   Alert,
   Linking,
   StyleSheet,
   ScrollView,
-  Dimensions,
-} from "react-native";
-import { View, Text, LoaderScreen, Button, Image } from "react-native-ui-lib";
-import MapView, { MapMarker, PROVIDER_GOOGLE } from "react-native-maps";
-import { URLSearchParams } from "react-native-url-polyfill";
-import { useQuery } from "react-query";
-import { serviceSpotsApi } from "../../../apis/service-spots";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ImageViewerModal from "../../../components/ImageViewerModal";
-import ShowModal from "../../../components/showModal";
+  Dimensions
+} from 'react-native'
+import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
+import MapView, { MapMarker, PROVIDER_GOOGLE } from 'react-native-maps'
+import { URLSearchParams } from 'react-native-url-polyfill'
+import { useQuery } from 'react-query'
+import { serviceSpotsApi } from '../../../apis/service-spots'
+import { FontAwesome5 } from '@expo/vector-icons'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import ImageViewerModal from '../../../components/ImageViewerModal'
+import ShowModal from '../../../components/showModal'
 
 type Params = {
-  slug: string;
-};
+  slug: string
+}
 
 function ServiceSpotDetail() {
-  const { slug } = useLocalSearchParams<Params>();
-  const serviceSpotId = useMemo(() => parseInt(slug!), [slug]);
-  const [showPriceRateImageModal, setShowPriceRateImageModal] = useState(false);
-  const [showSpotOwnerModal, setShowSpotOwnerModal] = useState(false);
-  const width = Dimensions.get("window").width;
+  const { slug } = useLocalSearchParams<Params>()
+  const serviceSpotId = useMemo(() => parseInt(slug!), [slug])
+  const [showPriceRateImageModal, setShowPriceRateImageModal] = useState(false)
+  const [showSpotOwnerModal, setShowSpotOwnerModal] = useState(false)
+  const width = Dimensions.get('window').width
 
-  const images = [
-    "https://us-fbcloud.net/wb/data/873/873184-img.r7wbbf.3b3bs.jpg",
-    "https://mpics.mgronline.com/pics/Images/558000005205102.JPEG",
-    "https://www.khaosod.co.th/wpapp/uploads/2018/07/20017758_823930217770740_5809775469527593470_o.jpg",
-  ];
-  const { data: serviceSpot } = useQuery(["service-spots", serviceSpotId], () =>
+  const { data: serviceSpot } = useQuery(['service-spots', serviceSpotId], () =>
     serviceSpotsApi.getServiceSpotById(serviceSpotId)
-  );
+  )
 
   const shouldDisableRouteButton = useMemo(() => {
-    return !serviceSpot?.coords.lat || !serviceSpot?.coords.lng;
-  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng]);
+    return !serviceSpot?.coords.lat || !serviceSpot?.coords.lng
+  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng])
 
   const openRouteViewInMapApplication = useCallback(async () => {
-    const searchParams = new URLSearchParams();
-    searchParams.append("api", "1");
+    const searchParams = new URLSearchParams()
+    searchParams.append('api', '1')
     searchParams.append(
-      "destination",
+      'destination',
       `${serviceSpot?.coords.lat},${serviceSpot?.coords.lng}`
-    );
-    const url = `https://www.google.com/maps/dir/?${searchParams.toString()}`;
-    const supported = await Linking.canOpenURL(url);
+    )
+    const url = `https://www.google.com/maps/dir/?${searchParams.toString()}`
+    const supported = await Linking.canOpenURL(url)
 
     if (!supported) {
-      Alert.alert("ไม่สามารถเปิดแผนที่ได้");
+      Alert.alert('ไม่สามารถเปิดแผนที่ได้')
+      return
     }
-    await Linking.openURL(url);
-  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng]);
+
+    await Linking.openURL(url)
+  }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng])
 
   if (!serviceSpot) {
-    return <LoaderScreen />;
+    return <LoaderScreen />
   }
 
   return (
     <View flex-1 height="100%">
       <Stack.Screen
         options={{
-          title: serviceSpot?.name,
+          title: serviceSpot.name
         }}
       />
       <ImageViewerModal
@@ -73,7 +70,7 @@ function ServiceSpotDetail() {
         onRequestClose={() => setShowPriceRateImageModal(false)}
         width={width}
         imageViewerProps={{
-          imageUrls: [{ url: serviceSpot.priceRateImageUrl }],
+          imageUrls: [{ url: serviceSpot.priceRateImageUrl }]
         }}
       />
       <ShowModal
@@ -95,7 +92,7 @@ function ServiceSpotDetail() {
         </View>
         <View paddingV-10 center>
           <Text h4B white>
-            {serviceSpot.serviceSpotOwner.firstName}{" "}
+            {serviceSpot.serviceSpotOwner.firstName}{' '}
             {serviceSpot.serviceSpotOwner.lastName}
           </Text>
         </View>
@@ -106,8 +103,8 @@ function ServiceSpotDetail() {
         </View>
         <View paddingV-10 center>
           <Text h4B white center>
-            {serviceSpot.serviceSpotOwner.vehicle.manufactor}{" "}
-            {serviceSpot.serviceSpotOwner.vehicle.model}{" "}
+            {serviceSpot.serviceSpotOwner.vehicle.manufactor}{' '}
+            {serviceSpot.serviceSpotOwner.vehicle.model}{' '}
             {serviceSpot.serviceSpotOwner.vehicle.province}
           </Text>
         </View>
@@ -126,17 +123,16 @@ function ServiceSpotDetail() {
               latitude: serviceSpot.coords.lat || 0,
               longitude: serviceSpot.coords.lng || 0,
               latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
+              longitudeDelta: 0.0421
             }}
             maxZoomLevel={15}
             minZoomLevel={15}
-            showsUserLocation
           >
             <MapMarker
               key={serviceSpot?.id}
               coordinate={{
                 latitude: serviceSpot.coords.lat || 0,
-                longitude: serviceSpot.coords.lng || 0,
+                longitude: serviceSpot.coords.lng || 0
               }}
             />
           </MapView>
@@ -168,15 +164,15 @@ function ServiceSpotDetail() {
             </View>
             <View>
               <Text>
-                {serviceSpot.addressLine1} {serviceSpot?.addressLine2 || ""}
+                {serviceSpot.addressLine1} {serviceSpot?.addressLine2 || ''}
                 {
                   // @ts-ignore
                   serviceSpot.address.nameTH
-                }{" "}
+                }{' '}
                 {
                   // @ts-ignore
                   serviceSpot.address.district.nameTH
-                }{" "}
+                }{' '}
                 {
                   // @ts-ignore
                   serviceSpot.address.district.province.nameTH
@@ -212,13 +208,13 @@ function ServiceSpotDetail() {
                       height={50}
                       width={50}
                       source={{
-                        uri: serviceSpot.serviceSpotOwner.profileImage,
+                        uri: serviceSpot.serviceSpotOwner.profileImage
                       }}
                     />
                   </View>
                   <View paddingL-10>
                     <Text bodyB>
-                      {serviceSpot?.serviceSpotOwner?.firstName}{" "}
+                      {serviceSpot?.serviceSpotOwner?.firstName}{' '}
                       {serviceSpot?.serviceSpotOwner?.lastName}
                     </Text>
                     <Text>วินหมายเลข {serviceSpot.serviceSpotOwner.no}</Text>
@@ -314,14 +310,14 @@ function ServiceSpotDetail() {
         </View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   map: {
-    width: "100%",
-    height: 200,
-  },
-});
+    width: '100%',
+    height: 200
+  }
+})
 
-export default ServiceSpotDetail;
+export default ServiceSpotDetail

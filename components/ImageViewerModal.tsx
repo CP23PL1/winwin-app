@@ -1,14 +1,14 @@
-import React from "react";
-import { Colors, Modal, View, ModalProps } from "react-native-ui-lib";
-import { AntDesign } from "@expo/vector-icons";
+import React from 'react'
+import { Colors, Modal, View, ModalProps } from 'react-native-ui-lib'
+import { AntDesign } from '@expo/vector-icons'
 import ImageViewer, {
-  ImageViewerPropsDefine,
-} from "react-native-image-zoom-viewer";
+  ImageViewerPropsDefine
+} from 'react-native-image-zoom-viewer'
 
 type Props = ModalProps & {
-  imageViewerProps: ImageViewerPropsDefine;
-  width: number;
-};
+  imageViewerProps: ImageViewerPropsDefine
+  width: number
+}
 
 export default function ImageViewerModal({
   imageViewerProps,
@@ -34,5 +34,5 @@ export default function ImageViewerModal({
         {...imageViewerProps}
       />
     </Modal>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-import { Text, View } from "react-native-ui-lib";
+import { Text, View } from 'react-native-ui-lib'
 
 type Props = {
-  errorMessage?: string;
-};
+  errorMessage?: string
+}
 
 export default function TextFieldError({ errorMessage }: Props) {
   return (
@@ -13,5 +13,5 @@ export default function TextFieldError({ errorMessage }: Props) {
         </Text>
       </View>
     )
-  );
+  )
 }

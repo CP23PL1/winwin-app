@@ -1,15 +1,15 @@
 export type Address = {
-  id: number;
-  nameTH: string;
-  nameEN: string;
-};
+  id: number
+  nameTH: string
+  nameEN: string
+}
 
 export type SubDistrict = Address & {
-  district: District;
-};
+  district: District
+}
 
 export type District = Address & {
-  province: Province;
-};
+  province: Province
+}
 
-export type Province = Address;
+export type Province = Address

@@ -1,11 +1,11 @@
-import React from "react";
-import { View, Text, Colors } from "react-native-ui-lib";
-import { StyleSheet } from "react-native";
+import React from 'react'
+import { View, Text, Colors } from 'react-native-ui-lib'
+import { StyleSheet } from 'react-native'
 
 type Props = {
-  dialCode: string;
-  value?: string;
-};
+  dialCode: string
+  value?: string
+}
 
 function PhoneNumberMask({ dialCode, value }: Props) {
   return (
@@ -15,14 +15,14 @@ function PhoneNumberMask({ dialCode, value }: Props) {
       <Text h4>{value?.slice(2, 5)}</Text>
       <Text h4>{value?.slice(5, 9)}</Text>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     borderBottomColor: Colors.$backgroundPrimaryHeavy,
-    borderBottomWidth: 1,
-  },
-});
+    borderBottomWidth: 1
+  }
+})
 
-export default PhoneNumberMask;
+export default PhoneNumberMask

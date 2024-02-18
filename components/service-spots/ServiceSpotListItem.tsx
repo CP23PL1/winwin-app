@@ -1,29 +1,27 @@
-import React from "react";
-import { StyleSheet } from "react-native";
-import { View, Text, Colors, TouchableOpacity } from "react-native-ui-lib";
-import { FontAwesome5, Entypo } from "@expo/vector-icons";
-import { ServiceSpot } from "../../apis/service-spots/type";
+import React from 'react'
+import { StyleSheet } from 'react-native'
+import { View, Text, Colors, TouchableOpacity } from 'react-native-ui-lib'
+import { FontAwesome5, Entypo } from '@expo/vector-icons'
+import { ServiceSpot } from '../../apis/service-spots/type'
 
 type Props = {
-  serviceSpot: ServiceSpot;
-  onPress?: ServiceSpotListItemPressHandler;
-};
-
-export type ServiceSpotListItemPressHandler = (
   serviceSpot: ServiceSpot
-) => void;
+  onPress?: ServiceSpotListItemPressHandler
+}
+
+export type ServiceSpotListItemPressHandler = (serviceSpot: ServiceSpot) => void
 
 function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
   const getDistanceText = (distance: number) => {
     if (distance < 1000) {
-      return `${Math.floor(distance)} เมตร`;
+      return `${Math.floor(distance)} เมตร`
     }
-    return `${(distance / 1000).toFixed(2)} กม.`;
-  };
+    return `${(distance / 1000).toFixed(2)} กม.`
+  }
 
   const handlePress = () => {
-    onPress?.(serviceSpot);
-  };
+    onPress?.(serviceSpot)
+  }
 
   return (
     <TouchableOpacity
@@ -51,14 +49,14 @@ function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
         <Entypo name="chevron-thin-right" size={24} />
       </View>
     </TouchableOpacity>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomColor: "#DCDCDC",
-    borderBottomWidth: 1,
-  },
-});
+    borderBottomColor: '#DCDCDC',
+    borderBottomWidth: 1
+  }
+})
 
-export default ServiceSpotListItem;
+export default ServiceSpotListItem
