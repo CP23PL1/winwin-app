@@ -1,37 +1,31 @@
-import { useFonts } from "expo-font";
-import { Slot, SplashScreen, useNavigation } from "expo-router";
-import React, { useEffect } from "react";
-import { QueryClientProvider } from "../providers/query-client";
-import "react-native-url-polyfill/auto";
-import { DesignSystem } from "../utils/design-system";
-import { LoaderScreen } from "react-native-ui-lib";
-import { Auth0Provider } from "react-native-auth0";
+import { useFonts } from 'expo-font'
+import { Slot, SplashScreen, useNavigation } from 'expo-router'
+import React, { useEffect } from 'react'
+import { QueryClientProvider } from '../providers/query-client'
+import 'react-native-url-polyfill/auto'
+import { DesignSystem } from '../utils/design-system'
+import { Auth0Provider } from 'react-native-auth0'
 
-DesignSystem.setup();
-SplashScreen.preventAutoHideAsync();
+DesignSystem.setup()
+SplashScreen.preventAutoHideAsync()
 
 function RootLayout() {
-  const navigation = useNavigation();
   const [fontsLoaded, error] = useFonts({
-    NotoSansThai: require("../assets/fonts/NotoSansThai-Regular.ttf"),
-    NotoSansThaiBold: require("../assets/fonts/NotoSansThai-Bold.ttf"),
-  });
+    NotoSansThai: require('../assets/fonts/NotoSansThai-Regular.ttf'),
+    NotoSansThaiBold: require('../assets/fonts/NotoSansThai-Bold.ttf')
+  })
 
   useEffect(() => {
     if (error) {
-      throw error;
+      throw error
     }
-  }, [error]);
+  }, [error])
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync()
     }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return <LoaderScreen />;
-  }
+  }, [fontsLoaded])
 
   return (
     <QueryClientProvider>
@@ -42,7 +36,7 @@ function RootLayout() {
         <Slot />
       </Auth0Provider>
     </QueryClientProvider>
-  );
+  )
 }
 
-export default RootLayout;
+export default RootLayout

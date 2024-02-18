@@ -1,6 +1,6 @@
-import { User } from "react-native-auth0";
-import axiosInstance from "../../libs/axios";
-import { CreateUser, UserIdentificationType } from "./type";
+import { User } from 'react-native-auth0'
+import axiosInstance from '../../libs/axios'
+import { CreateUser, UserIdentificationType } from './type'
 
 class UsersApi {
   async getUserBy(
@@ -9,14 +9,14 @@ class UsersApi {
   ) {
     return axiosInstance<User>(`/users/${identifier}`, {
       params: {
-        identify_by,
-      },
-    }).then((res) => res.data);
+        identify_by
+      }
+    }).then((res) => res.data)
   }
 
   async createUser(user: CreateUser) {
-    return axiosInstance.post<User>("/users", user).then((res) => res.data);
+    return axiosInstance.post<User>('/users', user).then((res) => res.data)
   }
 }
 
-export const usersApi = new UsersApi();
+export const usersApi = new UsersApi()

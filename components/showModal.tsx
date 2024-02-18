@@ -1,14 +1,14 @@
-import React from "react";
-import { Colors, Modal, View, ModalProps, Image } from "react-native-ui-lib";
-import { AntDesign } from "@expo/vector-icons";
+import React from 'react'
+import { Colors, Modal, View, ModalProps, Image } from 'react-native-ui-lib'
+import { AntDesign } from '@expo/vector-icons'
 
 type Props = ModalProps & {
-  children: React.ReactNode;
-  width: number;
-};
+  children: React.ReactNode
+  width: number
+}
 
 export default function ShowModal({ children, width, ...props }: Props) {
-  const modalWidth = width - 50;
+  const modalWidth = width - 50
   return (
     <Modal
       statusBarTranslucent
@@ -17,10 +17,10 @@ export default function ShowModal({ children, width, ...props }: Props) {
       {...props}
     >
       <View flex>
-        <View height={"80%"} center paddingT-100>
+        <View height={'80%'} center paddingT-100>
           <View
             backgroundColor={Colors.$textPrimary}
-            height={"100%"}
+            height={'100%'}
             width={modalWidth}
             br30
             flex
@@ -29,7 +29,7 @@ export default function ShowModal({ children, width, ...props }: Props) {
             {children}
           </View>
         </View>
-        <View height={"20%"} center paddingB-60 width={width}>
+        <View height={'20%'} center paddingB-60 width={width}>
           <View br100 backgroundColor={Colors.$textPrimary} padding-5>
             <AntDesign
               name="close"
@@ -41,5 +41,5 @@ export default function ShowModal({ children, width, ...props }: Props) {
         </View>
       </View>
     </Modal>
-  );
+  )
 }

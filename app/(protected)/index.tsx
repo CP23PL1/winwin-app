@@ -1,43 +1,42 @@
-import { Stack, useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { View, Text, LoaderScreen } from "react-native-ui-lib";
-import { useLocation } from "../../hooks/useLocation";
-import ServiceSpotList from "../../components/service-spots/ServiceSpotList";
-import { ServiceSpotListItemPressHandler } from "../../components/service-spots/ServiceSpotListItem";
-import { RefreshControl, ScrollView } from "react-native-gesture-handler";
-import { useQuery } from "react-query";
-import { serviceSpotsApi } from "../../apis/service-spots";
-
-const RADIUS = 2000;
+import { Stack, useRouter } from 'expo-router'
+import React, { useCallback, useState } from 'react'
+import { View, Text, LoaderScreen } from 'react-native-ui-lib'
+import { useLocation } from '../../hooks/useLocation'
+import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
+import { ServiceSpotListItemPressHandler } from '../../components/service-spots/ServiceSpotListItem'
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import { useQuery } from 'react-query'
+import { serviceSpotsApi } from '../../apis/service-spots'
+import { NEARBY_RADIUS } from '../../constants/service-spots'
 
 export default function ServiceSpots() {
-  const router = useRouter();
-  const { location } = useLocation();
+  const router = useRouter()
+  const { location } = useLocation()
 
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false)
 
   const { data: serviceSpots, refetch } = useQuery(
-    ["service-spots"],
+    ['service-spots'],
     () =>
       serviceSpotsApi.getNearbyServiceSpots({
         lat: location?.coords.latitude,
         lng: location?.coords.longitude,
-        radius: RADIUS,
+        radius: NEARBY_RADIUS
       }),
     {
-      enabled: !!location,
+      enabled: !!location
     }
-  );
+  )
 
   const handleItemPress: ServiceSpotListItemPressHandler = (serviceSpot) => {
-    router.push(`/(protected)/service-spots/${serviceSpot.id}`);
-  };
+    router.push(`/(protected)/service-spots/${serviceSpot.id}`)
+  }
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  }, []);
+    setRefreshing(true)
+    await refetch()
+    setRefreshing(false)
+  }, [])
 
   return (
     <ScrollView
@@ -45,10 +44,10 @@ export default function ServiceSpots() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <Stack.Screen options={{ title: "วินมอเตอร์ไซค์" }} />
+      <Stack.Screen options={{ title: 'วินมอเตอร์ไซค์' }} />
       <View padding-15>
         <View row spread>
-          <Text caption>ระยะ {RADIUS / 1000} กม.</Text>
+          <Text caption>ระยะ {NEARBY_RADIUS / 1000} กม.</Text>
           <Text caption>ทั้งหมด {serviceSpots?.length || 0} แห่ง</Text>
         </View>
         {serviceSpots ? (
@@ -60,5 +59,5 @@ export default function ServiceSpots() {
         )}
       </View>
     </ScrollView>
-  );
+  )
 }
