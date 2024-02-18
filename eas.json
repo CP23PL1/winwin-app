@@ -5,7 +5,10 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_AUTH0_DOMAIN": "cp23pl1-kmutt.jp.auth0.com"
+      }
     },
     "preview": {
       "distribution": "internal"
