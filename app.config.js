@@ -1,8 +1,8 @@
 module.exports = {
-  name: "WinWin",
+  name: process.env.APP_NAME || "WinWin",
   slug: "winwin",
   scheme: "winwin",
-  version: "1.0.0",
+  version: process.env.APP_VERSION,
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "light",
@@ -16,6 +16,7 @@ module.exports = {
     supportsTablet: true,
   },
   android: {
+    version: process.env.APP_VERSION || "1.0.0",
     package: "com.cp23pl1.winwin",
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",

@@ -18,9 +18,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@cp23pl1'
+          node-version: "20"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cp23pl1"
           cache: yarn
 
       - name: Setup EAS
@@ -36,6 +36,8 @@ jobs:
 
       - name: Build Android Apk
         run: |
+          touch .env.local
+          echo "APP_VERSION=${{ github.ref_name }}" >> .env.local
           eas build --platform android --local --output ./${{ env.OUTPUT_APK }}
 
       - name: Upload Release Asset
