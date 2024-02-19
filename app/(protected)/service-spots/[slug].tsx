@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import {
   Alert,
@@ -15,17 +15,21 @@ import { serviceSpotsApi } from '../../../apis/service-spots'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import ImageViewerModal from '../../../components/ImageViewerModal'
-import ShowModal from '../../../components/showModal'
+import CardModal from '../../../components/CardModal'
+import { AntDesign } from '@expo/vector-icons'
 
 type Params = {
   slug: string
 }
 
 function ServiceSpotDetail() {
+  const router = useRouter()
   const { slug } = useLocalSearchParams<Params>()
   const serviceSpotId = useMemo(() => parseInt(slug!), [slug])
   const [showPriceRateImageModal, setShowPriceRateImageModal] = useState(false)
   const [showSpotOwnerModal, setShowSpotOwnerModal] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState('')
+
   const width = Dimensions.get('window').width
 
   const { data: serviceSpot } = useQuery({
@@ -59,27 +63,32 @@ function ServiceSpotDetail() {
     return <LoaderScreen />
   }
 
+  const showWinWinCard = () => {
+    setPhoneNumber(
+      serviceSpot.serviceSpotOwner.phoneNumber.replace(/\+66/g, '0')
+    )
+    setShowSpotOwnerModal(true)
+  }
+
   return (
     <View flex-1 height="100%">
       <Stack.Screen
         options={{
-          title: serviceSpot.name
+          title: serviceSpot?.name
         }}
       />
       <ImageViewerModal
         visible={showPriceRateImageModal}
         onRequestClose={() => setShowPriceRateImageModal(false)}
-        width={width}
         imageViewerProps={{
           imageUrls: [{ url: serviceSpot.priceRateImageUrl }]
         }}
       />
-      <ShowModal
+      <CardModal
         visible={showSpotOwnerModal}
         onRequestClose={() => setShowSpotOwnerModal(false)}
-        width={width}
       >
-        <View center paddingV-10>
+        <View center>
           <Text h1B white>
             บัตร WinWin
           </Text>
@@ -99,22 +108,24 @@ function ServiceSpotDetail() {
         </View>
         <View paddingV-10 center>
           <Text h4B white>
-            {serviceSpot.serviceSpotOwner.phoneNumber}
+            {phoneNumber}
           </Text>
         </View>
         <View paddingV-10 center>
           <Text h4B white center>
             {serviceSpot.serviceSpotOwner.vehicle.manufactor}{' '}
-            {serviceSpot.serviceSpotOwner.vehicle.model}{' '}
-            {serviceSpot.serviceSpotOwner.vehicle.province}
+            {serviceSpot.serviceSpotOwner.vehicle.model}
           </Text>
         </View>
         <View paddingV-10 center>
           <Text h4B white center>
             {serviceSpot.serviceSpotOwner.vehicle.plate}
           </Text>
+          <Text h4B white center>
+            {serviceSpot.serviceSpotOwner.vehicle.province}
+          </Text>
         </View>
-      </ShowModal>
+      </CardModal>
       <ScrollView>
         <View flex-1>
           <MapView
@@ -128,6 +139,7 @@ function ServiceSpotDetail() {
             }}
             maxZoomLevel={15}
             minZoomLevel={15}
+            showsUserLocation
           >
             <MapMarker
               key={serviceSpot?.id}
@@ -156,7 +168,7 @@ function ServiceSpotDetail() {
                     color="#FDA84B"
                   />
                   <View paddingL-10>
-                    <Text $textPrimary bodyB>
+                    <Text primary bodyB>
                       เส้นทาง
                     </Text>
                   </View>
@@ -188,21 +200,44 @@ function ServiceSpotDetail() {
                   avoidInnerPadding
                   onPress={() => setShowPriceRateImageModal(true)}
                 >
-                  <MaterialCommunityIcons
-                    name="currency-btc"
-                    size={20}
-                    color="#FDA84B"
-                  />
-                  <Text bodyB $textPrimary>
+                  <View paddingH-5>
+                    <MaterialCommunityIcons
+                      name="currency-btc"
+                      size={20}
+                      color="#FDA84B"
+                    />
+                  </View>
+
+                  <Text bodyB primary>
                     อัตราค่าบริการ
+                  </Text>
+                </Button>
+              </View>
+              <View left paddingT-10>
+                <Button
+                  bg-transparent
+                  avoidMinWidth
+                  avoidInnerPadding
+                  onPress={() => router.push('./calculate-price')}
+                >
+                  <View paddingH-5>
+                    <AntDesign name="calculator" size={20} color="#FDA84B" />
+                  </View>
+                  <Text bodyB primary>
+                    อัตราค่าบริการตามระยะทาง
                   </Text>
                 </Button>
               </View>
             </View>
             <View paddingV-5>
               <Text bodyB>ผู้ดูแล</Text>
-              <View row paddingV-10>
-                <Button none onPress={() => setShowSpotOwnerModal(true)}>
+              <View row paddingV-10 paddingL-10>
+                <Button
+                  bg-transparent
+                  avoidMinWidth
+                  avoidInnerPadding
+                  onPress={() => showWinWinCard()}
+                >
                   <View>
                     <Image
                       borderRadius={25}
@@ -222,56 +257,7 @@ function ServiceSpotDetail() {
                   </View>
                 </Button>
               </View>
-              {/* <Text>
-          {serviceSpotOwner?.firstName} {serviceSpotOwner?.lastName}
-        </Text> */}
             </View>
-            {/* <View paddingV-5>
-              <View row>
-                <View flex-1 left>
-                  <Text bodyB>สมาชิก</Text>
-                </View>
-                <View flex right>
-                  <Button bg-transparent avoidMinWidth avoidInnerPadding>
-                    <Text bodyB $textPrimary>
-                      ดูทั้งหมด
-                    </Text>
-                  </Button>
-                </View>
-              </View>
-              <View row paddingV-10>
-                <View paddingL-10>
-                  <Image
-                    borderRadius={25}
-                    height={50}
-                    width={50}
-                    source={{
-                      uri: "https://mpics.mgronline.com/pics/Images/563000001291201.JPEG",
-                    }}
-                  />
-                </View>
-                <View paddingL-10>
-                  <Text bodyB>นายรังสรรค์ มีสุข</Text>
-                  <Text>วินหมายเลข 4</Text>
-                </View>
-              </View>
-              <View row paddingV-10>
-                <View paddingL-10>
-                  <Image
-                    borderRadius={25}
-                    height={50}
-                    width={50}
-                    source={{
-                      uri: "https://www.matichon.co.th/wp-content/uploads/2019/11/87-2.jpg",
-                    }}
-                  />
-                </View>
-                <View paddingL-10>
-                  <Text bodyB>นายอัศวิน ใจดี</Text>
-                  <Text>วินหมายเลข 5</Text>
-                </View>
-              </View>
-            </View> */}
             {/* <View paddingV-10>
               <Button bg-transparent avoidMinWidth avoidInnerPadding>
                 <Carousel

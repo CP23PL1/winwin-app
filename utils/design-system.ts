@@ -1,4 +1,10 @@
-import { Spacings, ThemeManager, Typography, Colors } from 'react-native-ui-lib'
+import {
+  Spacings,
+  ThemeManager,
+  Typography,
+  Colors,
+  BorderRadiuses
+} from 'react-native-ui-lib'
 
 export class DesignSystem {
   static setup() {
@@ -35,32 +41,46 @@ export class DesignSystem {
         color: Colors.black
       }
 
+      if (props.primary) {
+        defaultProps.color = Colors.$textPrimary
+      }
+
       if (props.red) {
         defaultProps.color = Colors.red30
+      }
+
+      if (props.white) {
+        defaultProps.color = Colors.white
       }
 
       return defaultProps
     })
 
-    ThemeManager.setComponentTheme('TouchableOpacity', () => ({
-      style: {
-        backgroundColor: Colors.white,
-        paddingVertical: 55,
-        borderRadius: 10,
-        elevation: 20,
-        shadowColor: Colors.black
-      }
-    }))
-
     ThemeManager.setComponentTheme('Button', (props: any) => {
       const defaultProps = {
         backgroundColor: Colors.primaryColor,
         bodyB: true,
-        width: '100%'
+        width: '100%',
+        paddingVertical: 0,
+        borderRadius: 25
       }
 
       if (props.secondary) {
         defaultProps.backgroundColor = Colors.secondaryColor
+      }
+
+      if (props.whiteStyle) {
+        defaultProps.backgroundColor = Colors.white
+        defaultProps.paddingVertical = 15
+        defaultProps.borderRadius = 15
+      }
+      if (props.none) {
+        defaultProps.backgroundColor = Colors.transparent
+        defaultProps.width = '0%'
+      }
+      if (props.closeJob) {
+        defaultProps.backgroundColor = Colors.white
+        defaultProps.borderRadius = 5
       }
 
       return defaultProps

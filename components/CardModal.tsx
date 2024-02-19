@@ -5,13 +5,11 @@ import { Dimensions } from 'react-native'
 
 type Props = ModalProps & {
   children: React.ReactNode
-  width: number
 }
 
 export default function CardModal({ children, ...props }: Props) {
   const width = Dimensions.get('window').width
   const modalWidth = width - 50
-
   return (
     <Modal
       statusBarTranslucent

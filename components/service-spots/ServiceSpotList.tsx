@@ -1,6 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
 import React from 'react'
-import { Dimensions } from 'react-native'
 import ServiceSpotListItem, {
   ServiceSpotListItemPressHandler
 } from './ServiceSpotListItem'
@@ -14,11 +13,7 @@ type Props = {
 
 function ServiceSpotList({ items, onItemPress }: Props) {
   return items.length > 0 ? (
-    <View
-      style={{
-        height: Dimensions.get('screen').height
-      }}
-    >
+    <View height="100%">
       <FlashList
         data={items}
         renderItem={({ item }) => (

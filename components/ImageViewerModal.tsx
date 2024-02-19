@@ -4,17 +4,17 @@ import { AntDesign } from '@expo/vector-icons'
 import ImageViewer, {
   ImageViewerPropsDefine
 } from 'react-native-image-zoom-viewer'
+import { Dimensions } from 'react-native'
 
 type Props = ModalProps & {
   imageViewerProps: ImageViewerPropsDefine
-  width: number
 }
 
 export default function ImageViewerModal({
   imageViewerProps,
-  width,
   ...props
 }: Props) {
+  const width = Dimensions.get('window').width
   return (
     <Modal statusBarTranslucent transparent {...props}>
       <ImageViewer
