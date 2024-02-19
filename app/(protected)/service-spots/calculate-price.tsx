@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Stack, useRouter } from 'expo-router'
 import {
   Text,
@@ -6,50 +6,102 @@ import {
   View,
   TextField,
   Modal,
-  Colors,
-  TouchableOpacity
+  Colors
 } from 'react-native-ui-lib'
 import { AntDesign } from '@expo/vector-icons'
+import { serviceSpotUtil } from '../../../utils/service-spot'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StyleSheet } from 'react-native'
+import TextFieldError from '../../../components/TextFieldError'
 
 function CalPrice() {
-  const [price, setPrice] = useState(0)
-  const [distance, setDistance] = useState('')
+  const [distance, setDistance] = useState(0)
+  const [distanceInput, setDistanceInput] = useState('')
   const [showCalInfo, setShowCalInfo] = useState(false)
+  const [error, setError] = useState('')
 
-  const calculatePrice = () => {
-    const distanceToNumber = Number(distance)
-    if (!distanceToNumber) {
-      setPrice(0)
-    } else if (distanceToNumber <= 1.1) {
-      setPrice(15)
-    } else if (distanceToNumber <= 1.5) {
-      setPrice(20)
-    } else if (distanceToNumber <= 2) {
-      setPrice(25)
-    } else if (distanceToNumber <= 5) {
-      setPrice(25 + (distanceToNumber - 2) * 5)
-    } else if (distanceToNumber <= 10) {
-      const newPrice = (distanceToNumber - 5) * 10
-      setPrice(40 + newPrice)
-    } else {
-      setDistance(String('10'))
-      // Price is determined by the driver and passenger
-      setPrice(90)
+  const calculatedPrice = useMemo(() => {
+    const nf = new Intl.NumberFormat('th-TH', {
+      currency: 'THB',
+      style: 'currency',
+      minimumFractionDigits: 0
+    })
+    return nf.format(Math.round(serviceSpotUtil.calculatePrice(distance)))
+  }, [distance])
+
+  const calculatePrice = useCallback(() => {
+    const parseDistance = +distanceInput
+    if (isNaN(parseDistance)) {
+      setError('กรุณาใส่ระยะทางเป็นตัวเลข')
+      return
     }
-  }
 
-  const onDistanceChange = (value: any) => {
-    setPrice(0)
-    setDistance(value)
-  }
+    if (parseDistance < 0) {
+      setError('ระยะทางต้องมากกว่า 0')
+      return
+    }
+
+    if (parseDistance > 10) {
+      setError('ระยะทางต้องน้อยกว่าหรือเท่ากับ 10')
+      return
+    }
+
+    if (error) {
+      setError('')
+    }
+
+    setDistance(parseDistance)
+  }, [distanceInput])
+
+  const onDistanceChange = useCallback((value: string) => {
+    setDistanceInput(value)
+  }, [])
 
   return (
-    <View flex paddingH-20>
+    <>
       <Stack.Screen
         options={{
           title: 'อัตราค่าบริการตามระยะทาง'
         }}
       />
+      <SafeAreaView style={styles.container}>
+        <View flex paddingH-20>
+          <View paddingB-10>
+            <TextField
+              placeholder="ระยะทาง (กิโลเมตร)"
+              keyboardType="numeric"
+              onChangeText={onDistanceChange}
+            />
+          </View>
+          <TextFieldError errorMessage={error} />
+          <View paddingV-10>
+            <Button
+              bg-transparent
+              avoidMinWidth
+              avoidInnerPadding
+              onPress={() => setShowCalInfo(true)}
+            >
+              <View paddingR-5>
+                <AntDesign name="questioncircle" size={20} color="#FDA84B" />
+              </View>
+              <Text bodyB>การคำนวณค่าโดยสารคืออะไร?</Text>
+            </Button>
+          </View>
+          <View paddingV-10>
+            <Button onPress={calculatePrice}>
+              <Text bodyB white>
+                คำนวณราคา
+              </Text>
+            </Button>
+          </View>
+          {!!calculatedPrice && (
+            <View paddingV-10 center>
+              <Text h5B>ระยะทาง {distance.toFixed(2)} กิโลเมตร</Text>
+              <Text style={styles.calculatedPrice}>{calculatedPrice}</Text>
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
       <Modal
         statusBarTranslucent
         transparent
@@ -58,57 +110,28 @@ function CalPrice() {
         onRequestClose={() => setShowCalInfo(false)}
         onBackgroundPress={() => setShowCalInfo(false)}
       >
-        <View flex>
-          <View height={'100%'} paddingH-20 center centerV>
-            <View paddingH-25 backgroundColor={Colors.white} br30>
-              <View center paddingV-20>
-                <Text h2B>การคำนวณค่าโดยสาร</Text>
-                <View paddingV-5>
-                  <Text bodyB>
-                    เป็นตัวช่วยในการคิดค่าโดยสารหากวินมอเตอร์ไซค์ไม่ทราบว่าต้องคิดราคาให้กับผู้ใช้งานในราคาเท่าไหร่
-                  </Text>
-                </View>
-              </View>
-            </View>
+        <View flex center padding-20>
+          <View bg-white center padding-20 width="100%" br30 gap-12>
+            <Text h2B>การคำนวณค่าโดยสาร</Text>
+            <Text bodyB>
+              เป็นตัวช่วยในการคิดค่าโดยสารหากวินมอเตอร์ไซค์ไม่ทราบว่าต้องคิดราคาให้กับผู้ใช้งานในราคาเท่าไหร่
+            </Text>
           </View>
         </View>
       </Modal>
-
-      <View paddingB-10 paddingT-20>
-        <TextField
-          maxLength={2}
-          placeholder={'ระยะทาง (กิโลเมตร)'}
-          keyboardType="numeric"
-          onChangeText={(e: any) => onDistanceChange(e)}
-          value={distance}
-        />
-      </View>
-      {price ? (
-        <View paddingV-10 center>
-          <Text h5B>
-            ราคา: {price} บาท ในระยะทาง {distance} กิโลเมตร
-          </Text>
-        </View>
-      ) : (
-        ''
-      )}
-      <View center paddingV-10>
-        <TouchableOpacity row centerV onPress={() => setShowCalInfo(true)}>
-          <View paddingR-5>
-            <AntDesign name="questioncircle" size={20} color="#FDA84B" />
-          </View>
-          <Text bodyB>การคำนวณค่าโดยสารคืออะไร?</Text>
-        </TouchableOpacity>
-      </View>
-      <View paddingV-10>
-        <Button disabled={!distance} onPress={() => calculatePrice()}>
-          <Text bodyB white>
-            คำนวณราคา
-          </Text>
-        </Button>
-      </View>
-    </View>
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1
+  },
+  calculatedPrice: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    fontFamily: 'NotoSansThai'
+  }
+})
 
 export default CalPrice

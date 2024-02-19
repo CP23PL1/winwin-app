@@ -49,7 +49,7 @@ export default function ProtectedLayout() {
           ),
         headerTitle: (props) => (
           <Text h4 white>
-            {props.children}
+            {props?.children || 'Loading...'}
           </Text>
         ),
         headerStyle: {

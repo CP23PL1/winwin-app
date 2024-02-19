@@ -74,7 +74,7 @@ function ServiceSpotDetail() {
     <View flex-1 height="100%">
       <Stack.Screen
         options={{
-          title: serviceSpot?.name
+          title: serviceSpot.name
         }}
       />
       <ImageViewerModal
