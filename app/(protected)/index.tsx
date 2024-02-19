@@ -5,7 +5,7 @@ import { useLocation } from '../../hooks/useLocation'
 import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
 import { ServiceSpotListItemPressHandler } from '../../components/service-spots/ServiceSpotListItem'
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../apis/service-spots'
 import { NEARBY_RADIUS } from '../../constants/service-spots'
 
@@ -15,18 +15,16 @@ export default function ServiceSpots() {
 
   const [refreshing, setRefreshing] = useState(false)
 
-  const { data: serviceSpots, refetch } = useQuery(
-    ['service-spots'],
-    () =>
+  const { data: serviceSpots, refetch } = useQuery({
+    queryKey: ['service-spots'],
+    queryFn: () =>
       serviceSpotsApi.getNearbyServiceSpots({
         lat: location?.coords.latitude,
         lng: location?.coords.longitude,
         radius: NEARBY_RADIUS
       }),
-    {
-      enabled: !!location
-    }
-  )
+    enabled: !!location
+  })
 
   const handleItemPress: ServiceSpotListItemPressHandler = (serviceSpot) => {
     router.push(`/(protected)/service-spots/${serviceSpot.id}`)

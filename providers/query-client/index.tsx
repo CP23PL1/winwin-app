@@ -2,7 +2,7 @@ import {
   QueryClient,
   QueryClientProvider as DefaultQueryClientProvider,
   focusManager
-} from 'react-query'
+} from '@tanstack/react-query'
 import { useOnlineManager } from './hooks/useOnlineManager'
 import { useAppState } from './hooks/useAppState'
 import { AppStateStatus, Platform } from 'react-native'

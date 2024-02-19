@@ -14,6 +14,10 @@ class UsersApi {
     }).then((res) => res.data)
   }
 
+  async getMyUserInfo() {
+    return axiosInstance<User>('/users/me').then((res) => res.data)
+  }
+
   async createUser(user: CreateUser) {
     return axiosInstance.post<User>('/users', user).then((res) => res.data)
   }

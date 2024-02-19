@@ -3,22 +3,26 @@ import { Colors, LoaderScreen, Text } from 'react-native-ui-lib'
 import { Entypo } from '@expo/vector-icons'
 import { StyleSheet } from 'react-native'
 import { useAuth0 } from 'react-native-auth0'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { usersApi } from '../../apis/users'
-import { UserIdentificationType } from '../../apis/users/type'
 
 export default function ProtectedLayout() {
   const navigation = useNavigation()
 
   const { user, isLoading: isAuth0Loading } = useAuth0()
-  const { data: userInfo, isLoading: isUserInfoLoading } = useQuery(
-    ['user-info'],
-    () => usersApi.getUserBy(user?.name!, UserIdentificationType.PHONE_NUMBER),
-    {
-      enabled: user?.name !== undefined
-    }
-  )
-  console.log(user, userInfo, isAuth0Loading, isUserInfoLoading)
+
+  const { data: userInfo, isLoading: isUserInfoLoading } = useQuery({
+    queryKey: ['user-info'],
+    queryFn: usersApi.getMyUserInfo
+  })
+
+  console.log('ProtectedLayout', {
+    user,
+    userInfo,
+    isAuth0Loading,
+    isUserInfoLoading
+  })
+
   if (isAuth0Loading || isUserInfoLoading) {
     return <LoaderScreen />
   }

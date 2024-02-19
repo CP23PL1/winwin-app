@@ -5,7 +5,7 @@ import { useAuth0 } from 'react-native-auth0'
 import OTPTextInput from 'react-native-otp-textinput'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, Text, Button } from 'react-native-ui-lib'
-import { useQueryClient } from 'react-query'
+import { useQueryClient } from '@tanstack/react-query'
 
 type Params = {
   phoneNumber: string
@@ -34,11 +34,14 @@ export default function OtpScreen() {
     try {
       setIsSubmitting(true)
       await authorizeWithSMS({
-        phoneNumber,
+        phoneNumber: phoneNumber!,
         code,
         audience: process.env.EXPO_PUBLIC_AUTH0_AUDIENCE
       })
-      await queryClient.invalidateQueries(['user-info'])
+      await queryClient.invalidateQueries({
+        queryKey: ['user-info'],
+        type: 'all'
+      })
       router.replace('/(protected)/')
     } catch (error) {
       console.error(error)

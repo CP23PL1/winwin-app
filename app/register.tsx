@@ -8,7 +8,7 @@ import TextFieldError from '../components/TextFieldError'
 import { usersApi } from '../apis/users'
 import { useAuth0 } from 'react-native-auth0'
 import { useRouter } from 'expo-router'
-import { useQueryClient } from 'react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Alert } from 'react-native'
 
 const validationSchema = yup.object().shape({
@@ -29,23 +29,28 @@ export default function RegisterScreen() {
     resolver: yupResolver(validationSchema)
   })
 
-  const onSubmit = handleSubmit(async (data) => {
+  const { mutate: createUser } = useMutation({
+    mutationFn: usersApi.createUser,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['user-info'],
+        type: 'all'
+      })
+      router.replace('/(protected)/')
+    }
+  })
+
+  const onSubmit = handleSubmit((data) => {
     if (!user?.name) {
       Alert.alert('กรุณาเข้าสู่ระบบก่อน')
       return
     }
-    try {
-      await usersApi.createUser({
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: user?.name
-      })
-      await queryClient.invalidateQueries(['user-info'])
-      router.replace('/(protected)/')
-    } catch (error) {
-      console.error(error)
-    }
+    createUser({
+      phoneNumber: user.name,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName
+    })
   })
 
   return (

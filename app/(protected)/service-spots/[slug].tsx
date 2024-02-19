@@ -10,7 +10,7 @@ import {
 import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
 import MapView, { MapMarker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { URLSearchParams } from 'react-native-url-polyfill'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../../apis/service-spots'
 import { FontAwesome5 } from '@expo/vector-icons'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -28,9 +28,10 @@ function ServiceSpotDetail() {
   const [showSpotOwnerModal, setShowSpotOwnerModal] = useState(false)
   const width = Dimensions.get('window').width
 
-  const { data: serviceSpot } = useQuery(['service-spots', serviceSpotId], () =>
-    serviceSpotsApi.getServiceSpotById(serviceSpotId)
-  )
+  const { data: serviceSpot } = useQuery({
+    queryKey: ['service-spots', serviceSpotId],
+    queryFn: () => serviceSpotsApi.getServiceSpotById(serviceSpotId)
+  })
 
   const shouldDisableRouteButton = useMemo(() => {
     return !serviceSpot?.coords.lat || !serviceSpot?.coords.lng
