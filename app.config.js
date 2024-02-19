@@ -20,7 +20,7 @@ module.exports = {
     package: 'com.cp23pl1.winwin',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#FDA84B'
     },
     permissions: [
       'android.permission.ACCESS_COARSE_LOCATION',
