@@ -16,13 +16,6 @@ export default function ProtectedLayout() {
     queryFn: usersApi.getMyUserInfo
   })
 
-  console.log('ProtectedLayout', {
-    user,
-    userInfo,
-    isAuth0Loading,
-    isUserInfoLoading
-  })
-
   if (isAuth0Loading || isUserInfoLoading) {
     return <LoaderScreen />
   }

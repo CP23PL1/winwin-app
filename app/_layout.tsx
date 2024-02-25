@@ -1,5 +1,5 @@
 import { useFonts } from 'expo-font'
-import { Slot, SplashScreen, useNavigation } from 'expo-router'
+import { Slot, SplashScreen } from 'expo-router'
 import React, { useEffect } from 'react'
 import { QueryClientProvider } from '../providers/query-client'
 import 'react-native-url-polyfill/auto'

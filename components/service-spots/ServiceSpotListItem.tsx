@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native'
 import { View, Text, Colors, TouchableOpacity } from 'react-native-ui-lib'
 import { FontAwesome5, Entypo } from '@expo/vector-icons'
 import { ServiceSpot } from '../../apis/service-spots/type'
+import { serviceSpotUtil } from '../../utils/service-spot'
 
 type Props = {
   serviceSpot: ServiceSpot
@@ -12,13 +13,6 @@ type Props = {
 export type ServiceSpotListItemPressHandler = (serviceSpot: ServiceSpot) => void
 
 function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
-  const getDistanceText = (distance: number) => {
-    if (distance < 1000) {
-      return `${Math.floor(distance)} เมตร`
-    }
-    return `${(distance / 1000).toFixed(2)} กม.`
-  }
-
   const handlePress = () => {
     onPress?.(serviceSpot)
   }
@@ -43,7 +37,9 @@ function ServiceSpotListItem({ serviceSpot, onPress }: Props) {
           </View>
           <View>
             <Text h5>{serviceSpot.name}</Text>
-            <Text caption>{getDistanceText(serviceSpot.distance!)}</Text>
+            <Text caption>
+              {serviceSpotUtil.getDistanceText(serviceSpot.distance!)}
+            </Text>
           </View>
         </View>
         <Entypo name="chevron-thin-right" size={24} />

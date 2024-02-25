@@ -1,4 +1,4 @@
-import { Stack, useRouter } from 'expo-router'
+import { Link, Stack, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
 import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
 import { useLocation } from '../../hooks/useLocation'
@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../apis/service-spots'
 import { NEARBY_RADIUS } from '../../constants/service-spots'
 import { useAuth0 } from 'react-native-auth0'
+import { Feather } from '@expo/vector-icons'
 
 export default function ServiceSpots() {
   const router = useRouter()
@@ -51,6 +52,11 @@ export default function ServiceSpots() {
         }
       >
         <View padding-15>
+          <View marginB-10 right>
+            <Link href="/(protected)/map">
+              <Feather name="map" size={24} color="black" />
+            </Link>
+          </View>
           <View row spread>
             <Text caption>ระยะ {NEARBY_RADIUS / 1000} กม.</Text>
             <Text caption>ทั้งหมด {serviceSpots?.length || 0} แห่ง</Text>

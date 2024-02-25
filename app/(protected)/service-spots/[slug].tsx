@@ -139,6 +139,7 @@ function ServiceSpotDetail() {
             }}
             maxZoomLevel={15}
             minZoomLevel={15}
+            showsMyLocationButton={false}
             showsUserLocation
           >
             <MapMarker

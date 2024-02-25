@@ -16,6 +16,13 @@ class ServiceSpotUtil {
       return 90
     }
   }
+
+  getDistanceText = (distance: number) => {
+    if (distance < 1000) {
+      return `${Math.floor(distance)} เมตร`
+    }
+    return `${(distance / 1000).toFixed(2)} กม.`
+  }
 }
 
 export const serviceSpotUtil = new ServiceSpotUtil()
