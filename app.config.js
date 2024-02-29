@@ -2,7 +2,7 @@ module.exports = {
   name: process.env.APP_NAME || 'WinWin',
   slug: 'winwin',
   scheme: 'winwin',
-  version: process.env.APP_VERSION,
+  version: process.env.APP_VERSION || '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'light',
@@ -13,8 +13,10 @@ module.exports = {
   },
   assetBundlePatterns: ['**/*'],
   ios: {
-    supportsTablet: true
+    supportsTablet: true,
+    bundleIdentifier: 'com.cp23pl1.winwin'
   },
+
   android: {
     version: process.env.APP_VERSION || '1.0.0',
     package: 'com.cp23pl1.winwin',
@@ -49,7 +51,7 @@ module.exports = {
     [
       'react-native-auth0',
       {
-        domain: process.env.EXPO_PUBLIC_AUTH0_DOMAIN
+        domain: 'cp23pl1-kmutt.jp.auth0.com'
       }
     ]
   ],

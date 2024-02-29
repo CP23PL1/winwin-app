@@ -1,90 +1,176 @@
-import { Link, Stack, useRouter } from 'expo-router'
-import React, { useCallback, useState } from 'react'
-import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import MapView, {
+  Callout,
+  Details,
+  Marker,
+  PROVIDER_GOOGLE,
+  Region
+} from 'react-native-maps'
+import { LoaderScreen, View, Button } from 'react-native-ui-lib'
 import { useLocation } from '../../hooks/useLocation'
-import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
-import { ServiceSpotListItemPressHandler } from '../../components/service-spots/ServiceSpotListItem'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import { StyleSheet } from 'react-native'
+import { Stack, router } from 'expo-router'
+import AddressSearchInput from '../../components/AddressSearchInput'
+import {
+  GooglePlaceData,
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete
+} from 'react-native-google-places-autocomplete'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../apis/service-spots'
 import { NEARBY_RADIUS } from '../../constants/service-spots'
-import { useAuth0 } from 'react-native-auth0'
-import { Feather } from '@expo/vector-icons'
+import debounce from 'lodash.debounce'
+import ServiceSpotCallout from '../../components/service-spots/ServiceSpotCallout'
+import uuid from 'react-native-uuid'
 
-export default function ServiceSpots() {
-  const router = useRouter()
-  const { clearCredentials } = useAuth0()
+const initialRegionDelta = {
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01
+}
+
+export default function RootProtectedScreen({}) {
   const { location } = useLocation()
+  const map = useRef<MapView | null>(null)
+  const [autocompleteSessionToken, setAutocompleteSessionToken] =
+    useState<string>(uuid.v4().toString())
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null)
+  const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
+  const [selectedPlace, setSelectedPlace] = useState<Pick<
+    GooglePlaceDetail,
+    'geometry'
+  > | null>(null)
 
-  const [refreshing, setRefreshing] = useState(false)
-
-  const { data: serviceSpots, refetch } = useQuery({
+  const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
     queryKey: ['service-spots'],
     queryFn: () =>
       serviceSpotsApi.getNearbyServiceSpots({
-        lat: location?.coords.latitude,
-        lng: location?.coords.longitude,
+        lat: selectedPlace?.geometry.location.lat,
+        lng: selectedPlace?.geometry.location.lng,
         radius: NEARBY_RADIUS
       }),
-    enabled: !!location
+    enabled: selectedPlace !== null
   })
 
-  const handleItemPress: ServiceSpotListItemPressHandler = (serviceSpot) => {
-    router.push(`/(protected)/service-spots/${serviceSpot.id}`)
-  }
+  useEffect(() => {
+    if (!location) return
+    setInitialRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      ...initialRegionDelta
+    })
+  }, [location])
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true)
-    await refetch()
-    setRefreshing(false)
-  }, [])
+  const handlePlaceSelect = useCallback(
+    (_: GooglePlaceData, details: GooglePlaceDetail | null) => {
+      if (!details) return
+      map.current?.animateToRegion({
+        latitude: details.geometry.location.lat,
+        longitude: details.geometry.location.lng,
+        ...initialRegionDelta
+      })
+      setSelectedPlace(details)
+      setAutocompleteSessionToken(uuid.v4().toString())
+    },
+    [map.current]
+  )
+  const handleRegionChangeComplete = useCallback(
+    debounce((_, details: Details) => {
+      if (details.isGesture) return
+      if (!isRegionFirstChange) {
+        setIsRegionFirstChange(true)
 
-  const signOut = () => {
-    clearCredentials()
-  }
+        return
+      }
+      refetchNearbyServiceSpots()
+    }, 1000),
+    [isRegionFirstChange]
+  )
 
   return (
-    <View flex>
-      <Stack.Screen options={{ title: 'วินมอเตอร์ไซค์' }} />
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        <View padding-15>
-          <View marginB-10 right>
-            <Link href="/(protected)/map">
-              <Feather name="map" size={24} color="black" />
-            </Link>
-          </View>
-          <View row spread>
-            <Text caption>ระยะ {NEARBY_RADIUS / 1000} กม.</Text>
-            <Text caption>ทั้งหมด {serviceSpots?.length || 0} แห่ง</Text>
-          </View>
-          {serviceSpots ? (
-            <View>
-              <ServiceSpotList
-                items={serviceSpots}
-                onItemPress={handleItemPress}
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      {initialRegion ? (
+        <View height="100%">
+          <MapView
+            ref={map}
+            style={StyleSheet.absoluteFill}
+            initialRegion={initialRegion}
+            onRegionChangeComplete={handleRegionChangeComplete}
+            provider={PROVIDER_GOOGLE}
+            showsMyLocationButton={false}
+            showsUserLocation
+          >
+            {selectedPlace && (
+              <Marker
+                coordinate={{
+                  latitude: selectedPlace.geometry.location.lat,
+                  longitude: selectedPlace.geometry.location.lng
+                }}
+                image={require('../../assets/map_marker_red.png')}
               />
-            </View>
-          ) : (
-            <View center marginV-20>
-              <LoaderScreen message="ค้นหาวินมอเตอร์ไซค์ใกล้คุณ..." />
-            </View>
-          )}
+            )}
+            {serviceSpots?.map((serviceSpot) => (
+              <Marker
+                key={serviceSpot.id}
+                coordinate={{
+                  latitude: serviceSpot.coords.lat,
+                  longitude: serviceSpot.coords.lng
+                }}
+                image={require('../../assets/map_marker_orange.png')}
+              >
+                <Callout
+                  tooltip
+                  onPress={() =>
+                    router.push(`/service-spots/${serviceSpot.id}`)
+                  }
+                >
+                  <ServiceSpotCallout serviceSpot={serviceSpot} />
+                </Callout>
+              </Marker>
+            ))}
+          </MapView>
+          <View marginT-30 padding-20 center height="100%">
+            <GooglePlacesAutocomplete
+              enablePoweredByContainer={false}
+              placeholder="ค้นหาสถานที่"
+              onPress={handlePlaceSelect}
+              styles={{ container: styles.placeAutocompleteContainer }}
+              fetchDetails
+              GooglePlacesDetailsQuery={{
+                fields: 'geometry',
+                sessiontoken: autocompleteSessionToken
+              }}
+              query={{
+                key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
+                language: 'th',
+                components: 'country:th',
+                sessiontoken: autocompleteSessionToken
+              }}
+              textInputProps={{
+                InputComp: AddressSearchInput,
+                style: { padding: 0 }
+              }}
+              onFail={(error) => console.error(error)}
+            />
+          </View>
+          <View absB absL bg-white padding-15 style={styles.footer}>
+            <Button label="เรียกรับบริการ" disabled={selectedPlace === null} />
+          </View>
         </View>
-      </ScrollView>
-      <View center paddingB-5>
-        <Button
-          avoidInnerPadding
-          avoidMinWidth
-          bg-transparent
-          onPress={() => signOut()}
-        >
-          <Text red>ออกจากระบบ</Text>
-        </Button>
-      </View>
-    </View>
+      ) : (
+        <LoaderScreen />
+      )}
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  footer: {
+    width: '100%',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30
+  },
+  placeAutocompleteContainer: {
+    width: '100%'
+  }
+})

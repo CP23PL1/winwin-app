@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import * as Location from 'expo-location'
-import { Platform } from 'react-native'
 
 export function useLocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>(null)
@@ -13,12 +12,7 @@ export function useLocation() {
     }
     console.log('Permission granted')
     console.log('Getting current location')
-    const location = await Location.getCurrentPositionAsync({
-      accuracy:
-        Platform.OS === 'android'
-          ? Location.Accuracy.Lowest
-          : Location.Accuracy.Low
-    })
+    const location = await Location.getCurrentPositionAsync({})
     console.log('Got current location')
     console.log(
       `Location: ${location.coords.latitude}, ${location.coords.longitude}`
