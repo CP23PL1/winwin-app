@@ -1,84 +1,73 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, {
   Callout,
   Details,
+  LatLng,
   Marker,
   PROVIDER_GOOGLE,
+  Polyline,
   Region
 } from 'react-native-maps'
-import { LoaderScreen, View, Button } from 'react-native-ui-lib'
+import { LoaderScreen, View, Button, Text } from 'react-native-ui-lib'
 import { useLocation } from '../../hooks/useLocation'
 import { StyleSheet } from 'react-native'
 import { Stack, router } from 'expo-router'
-import AddressSearchInput from '../../components/AddressSearchInput'
-import {
-  GooglePlaceData,
-  GooglePlaceDetail,
-  GooglePlacesAutocomplete
-} from 'react-native-google-places-autocomplete'
+import { GooglePlaceDetail } from 'react-native-google-places-autocomplete'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../apis/service-spots'
 import { NEARBY_RADIUS } from '../../constants/service-spots'
 import debounce from 'lodash.debounce'
 import ServiceSpotCallout from '../../components/service-spots/ServiceSpotCallout'
-import uuid from 'react-native-uuid'
+import { isAxiosError } from 'axios'
+import { serviceSpotUtil } from '../../utils/service-spot'
+import { mapUtil } from '../../utils/map'
+import { googleApi } from '../../apis/google'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import RouteCard from '../../components/RouteCard'
 
-const initialRegionDelta = {
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01
-}
-
-export default function RootProtectedScreen({}) {
+export default function RootProtectedScreen() {
   const { location } = useLocation()
   const map = useRef<MapView | null>(null)
-  const [autocompleteSessionToken, setAutocompleteSessionToken] =
-    useState<string>(uuid.v4().toString())
+
+  const [origin, setOrigin] = useState<GooglePlaceDetail | null>(null)
+  const [destination, setDestination] = useState<GooglePlaceDetail | null>(null)
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
   const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
-  const [selectedPlace, setSelectedPlace] = useState<Pick<
-    GooglePlaceDetail,
-    'geometry'
-  > | null>(null)
+
+  const [route, setRoute] = useState<any>()
+  const [points, setPoints] = useState<LatLng[]>([])
 
   const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
     queryKey: ['service-spots'],
     queryFn: () =>
       serviceSpotsApi.getNearbyServiceSpots({
-        lat: selectedPlace?.geometry.location.lat,
-        lng: selectedPlace?.geometry.location.lng,
+        lat: destination?.geometry.location.lat ?? location?.coords.latitude,
+        lng: destination?.geometry.location.lng ?? location?.coords.longitude,
         radius: NEARBY_RADIUS
       }),
-    enabled: selectedPlace !== null
+    enabled: destination !== null || location !== null
   })
+  const shouldDisableDriveRequestButton = useMemo(() => {
+    return !origin || !destination
+  }, [origin, destination])
 
-  useEffect(() => {
-    if (!location) return
-    setInitialRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      ...initialRegionDelta
+  const formattedPrice = useMemo(() => {
+    if (!route) return
+    const nf = new Intl.NumberFormat('th-TH', {
+      currency: 'THB',
+      style: 'currency',
+      minimumFractionDigits: 0
     })
-  }, [location])
+    return nf.format(
+      serviceSpotUtil.calculatePrice(route.distanceMeters / 1000)
+    )
+  }, [route?.distanceMeters])
 
-  const handlePlaceSelect = useCallback(
-    (_: GooglePlaceData, details: GooglePlaceDetail | null) => {
-      if (!details) return
-      map.current?.animateToRegion({
-        latitude: details.geometry.location.lat,
-        longitude: details.geometry.location.lng,
-        ...initialRegionDelta
-      })
-      setSelectedPlace(details)
-      setAutocompleteSessionToken(uuid.v4().toString())
-    },
-    [map.current]
-  )
   const handleRegionChangeComplete = useCallback(
     debounce((_, details: Details) => {
       if (details.isGesture) return
       if (!isRegionFirstChange) {
         setIsRegionFirstChange(true)
-
         return
       }
       refetchNearbyServiceSpots()
@@ -86,10 +75,63 @@ export default function RootProtectedScreen({}) {
     [isRegionFirstChange]
   )
 
+  const fetchRoutes = useCallback(async () => {
+    if (!origin?.place_id || !destination?.place_id) return
+    try {
+      const data = await googleApi.getRoutes({
+        origin: {
+          placeId: origin.place_id
+        },
+        destination: {
+          placeId: destination.place_id
+        },
+        travelMode: 'TWO_WHEELER',
+        languageCode: 'th-TH',
+        units: 'METRIC'
+      })
+      const decodedPolyline = mapUtil.decodePolyline(
+        data.routes[0].polyline.encodedPolyline
+      )
+      setRoute({
+        duration: data.routes[0].duration,
+        distanceMeters: data.routes[0].distanceMeters
+      })
+      setPoints(decodedPolyline)
+      map.current?.fitToCoordinates(decodedPolyline, {
+        edgePadding: {
+          top: 100,
+          right: 100,
+          bottom: 100,
+          left: 100
+        }
+      })
+    } catch (error) {
+      if (isAxiosError(error)) {
+        console.error(error.response?.data)
+      }
+    }
+  }, [map.current, origin, destination])
+
+  useEffect(() => {
+    fetchRoutes()
+  }, [fetchRoutes])
+
+  useEffect(() => {
+    if (!location) return
+    setInitialRegion({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01
+    })
+  }, [location])
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      {initialRegion ? (
+      {!initialRegion ? (
+        <LoaderScreen />
+      ) : (
         <View height="100%">
           <MapView
             ref={map}
@@ -100,14 +142,32 @@ export default function RootProtectedScreen({}) {
             showsMyLocationButton={false}
             showsUserLocation
           >
-            {selectedPlace && (
+            {destination && (
               <Marker
                 coordinate={{
-                  latitude: selectedPlace.geometry.location.lat,
-                  longitude: selectedPlace.geometry.location.lng
+                  latitude: destination.geometry.location.lat,
+                  longitude: destination.geometry.location.lng
                 }}
                 image={require('../../assets/map_marker_red.png')}
               />
+            )}
+            {points.length > 0 ? (
+              <>
+                <Polyline
+                  coordinates={points}
+                  strokeColor="#7C89FF"
+                  strokeWidth={3}
+                />
+                <Marker
+                  coordinate={{
+                    latitude: origin?.geometry.location.lat!,
+                    longitude: origin?.geometry.location.lng!
+                  }}
+                  image={require('../../assets/map_marker_blue.png')}
+                />
+              </>
+            ) : (
+              <></>
             )}
             {serviceSpots?.map((serviceSpot) => (
               <Marker
@@ -129,36 +189,33 @@ export default function RootProtectedScreen({}) {
               </Marker>
             ))}
           </MapView>
-          <View marginT-30 padding-20 center height="100%">
-            <GooglePlacesAutocomplete
-              enablePoweredByContainer={false}
-              placeholder="ค้นหาสถานที่"
-              onPress={handlePlaceSelect}
-              styles={{ container: styles.placeAutocompleteContainer }}
-              fetchDetails
-              GooglePlacesDetailsQuery={{
-                fields: 'geometry',
-                sessiontoken: autocompleteSessionToken
-              }}
-              query={{
-                key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
-                language: 'th',
-                components: 'country:th',
-                sessiontoken: autocompleteSessionToken
-              }}
-              textInputProps={{
-                InputComp: AddressSearchInput,
-                style: { padding: 0 }
-              }}
-              onFail={(error) => console.error(error)}
+          <SafeAreaView style={{ marginTop: 10, alignItems: 'center' }}>
+            <RouteCard
+              origin={origin}
+              destination={destination}
+              onOriginChange={setOrigin}
+              onDestinationChange={setDestination}
             />
-          </View>
+          </SafeAreaView>
           <View absB absL bg-white padding-15 style={styles.footer}>
-            <Button label="เรียกรับบริการ" disabled={selectedPlace === null} />
+            {route && (
+              <View row centerH spread paddingH-15 marginB-15>
+                <View>
+                  <Text caption>ระยะทางและเวลา</Text>
+                  <Text body>
+                    {Math.round(route.duration.split('s')[0] / 60)} นาที (
+                    {serviceSpotUtil.getDistanceText(route.distanceMeters)})
+                  </Text>
+                </View>
+                <View right>
+                  <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
+                  <Text h4B>{formattedPrice}</Text>
+                </View>
+              </View>
+            )}
+            <Button label="ยืนยัน" disabled={shouldDisableDriveRequestButton} />
           </View>
         </View>
-      ) : (
-        <LoaderScreen />
       )}
     </>
   )
@@ -169,8 +226,5 @@ const styles = StyleSheet.create({
     width: '100%',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30
-  },
-  placeAutocompleteContainer: {
-    width: '100%'
   }
 })

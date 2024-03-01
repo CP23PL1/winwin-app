@@ -9,9 +9,9 @@ class ServiceSpotUtil {
     } else if (distance <= 2) {
       return 25
     } else if (distance <= 5) {
-      return (distance - 2) * 5 + 25
+      return Math.round((distance - 2) * 5 + 25)
     } else if (distance <= 10) {
-      return (distance - 5) * 10 + 40
+      return Math.round((distance - 5) * 10 + 40)
     } else {
       return 90
     }
@@ -20,7 +20,7 @@ class ServiceSpotUtil {
     if (distance < 1000) {
       return `${Math.floor(distance)} เมตร`
     }
-    return `${(distance / 1000).toFixed(2)} กม.`
+    return `${Math.round(distance / 1000)} กม.`
   }
 }
 
