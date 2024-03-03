@@ -37,6 +37,9 @@ export default function RegisterScreen() {
         type: 'all'
       })
       router.replace('/(protected)/')
+    },
+    onError: (error: any) => {
+      console.error(error)
     }
   })
 

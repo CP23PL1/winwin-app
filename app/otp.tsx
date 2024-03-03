@@ -36,7 +36,8 @@ export default function OtpScreen() {
       await authorizeWithSMS({
         phoneNumber: phoneNumber!,
         code,
-        audience: process.env.EXPO_PUBLIC_AUTH0_AUDIENCE
+        audience: process.env.EXPO_PUBLIC_AUTH0_AUDIENCE,
+        scope: process.env.EXPO_PUBLIC_AUTH0_SCOPE
       })
       await queryClient.invalidateQueries({
         queryKey: ['user-info'],
