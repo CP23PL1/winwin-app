@@ -15,7 +15,7 @@ import { Stack, router } from 'expo-router'
 import { GooglePlaceDetail } from 'react-native-google-places-autocomplete'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '../../apis/service-spots'
-import { NEARBY_RADIUS } from '../../constants/service-spots'
+import { NEARBY_RADIUS, SERVICE_CHARGE } from '../../constants/service-spots'
 import debounce from 'lodash.debounce'
 import ServiceSpotCallout from '../../components/service-spots/ServiceSpotCallout'
 import { isAxiosError } from 'axios'
@@ -24,6 +24,8 @@ import { mapUtil } from '../../utils/map'
 import { googleApi } from '../../apis/google'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import RouteCard from '../../components/RouteCard'
+import { commonUtil } from '../../utils/common'
+import { useAuth0 } from 'react-native-auth0'
 
 export default function RootProtectedScreen() {
   const { location } = useLocation()
@@ -51,17 +53,13 @@ export default function RootProtectedScreen() {
     return !origin || !destination
   }, [origin, destination])
 
-  const formattedPrice = useMemo(() => {
-    if (!route) return
-    const nf = new Intl.NumberFormat('th-TH', {
-      currency: 'THB',
-      style: 'currency',
-      minimumFractionDigits: 0
-    })
-    return nf.format(
-      serviceSpotUtil.calculatePrice(route.distanceMeters / 1000)
-    )
-  }, [route?.distanceMeters])
+  const price = useMemo(
+    () =>
+      route?.distanceMeters
+        ? serviceSpotUtil.calculatePrice(route.distanceMeters / 1000)
+        : 0,
+    [route?.distanceMeters]
+  )
 
   const handleRegionChangeComplete = useCallback(
     debounce((_, details: Details) => {
@@ -111,6 +109,10 @@ export default function RootProtectedScreen() {
       }
     }
   }, [map.current, origin, destination])
+  const { clearSession } = useAuth0()
+  const logout = () => {
+    clearSession()
+  }
 
   useEffect(() => {
     fetchRoutes()
@@ -199,20 +201,31 @@ export default function RootProtectedScreen() {
           </SafeAreaView>
           <View absB absL bg-white padding-15 style={styles.footer}>
             {route && (
-              <View row centerH spread paddingH-15 marginB-15>
-                <View>
+              <View paddingH-15 marginB-15>
+                <View row spread centerV>
                   <Text caption>ระยะทางและเวลา</Text>
-                  <Text body>
+                  <Text h5B>
                     {Math.round(route.duration.split('s')[0] / 60)} นาที (
                     {serviceSpotUtil.getDistanceText(route.distanceMeters)})
                   </Text>
                 </View>
-                <View right>
+                <View row spread centerV>
                   <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-                  <Text h4B>{formattedPrice}</Text>
+                  <Text body>{commonUtil.formatCurrency(price)}</Text>
+                </View>
+                <View row spread centerV>
+                  <Text caption>ค่าเรียก</Text>
+                  <Text body>{commonUtil.formatCurrency(SERVICE_CHARGE)}</Text>
+                </View>
+                <View row spread centerV>
+                  <Text caption>ทั้งหมด</Text>
+                  <Text h5B>
+                    {commonUtil.formatCurrency(price + SERVICE_CHARGE)}
+                  </Text>
                 </View>
               </View>
             )}
+            <Button label="Logout" onPress={logout} />
             <Button label="ยืนยัน" disabled={shouldDisableDriveRequestButton} />
           </View>
         </View>
