@@ -127,9 +127,12 @@ function ServiceSpotDetail() {
                 maxZoomLevel={15}
                 minZoomLevel={15}
                 showsUserLocation
+                showsMyLocationButton={false}
+                toolbarEnabled={true}
               >
                 <MapMarker
                   key={serviceSpot?.id}
+                  image={require('../../../assets/map_marker_orange.png')}
                   coordinate={{
                     latitude: serviceSpot.coords.lat || 0,
                     longitude: serviceSpot.coords.lng || 0

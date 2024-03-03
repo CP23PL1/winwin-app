@@ -9,6 +9,7 @@ import {
 import { Colors, Modal, ModalProps, View, Text } from 'react-native-ui-lib'
 import { FontAwesome5, Feather } from '@expo/vector-icons'
 import uuid from 'react-native-uuid'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 type Props = ModalProps & {
   onSelectPlace: (
@@ -41,46 +42,48 @@ export default function PlaceAutocompleteModal(props: Props) {
   }, [ref.current, props.visible])
 
   return (
-    <Modal {...props} animationType="slide">
-      <GooglePlacesAutocomplete
-        ref={ref}
-        enablePoweredByContainer={false}
-        placeholder="ค้นหาสถานที่"
-        onPress={handleSelectPlace}
-        styles={{
-          container: styles.container,
-          textInputContainer: styles.textInputContainer,
-          textInput: styles.textInput
-        }}
-        fetchDetails
-        renderLeftButton={() => <Feather name="search" size={20} />}
-        renderRow={(data) => (
-          <View row gap-12>
-            <FontAwesome5
-              name="map-marker-alt"
-              size={20}
-              color={Colors.red40}
-            />
-            <View>
-              <Text>{data.structured_formatting.main_text}</Text>
-              <Text style={{ fontSize: 12 }}>
-                {data.structured_formatting.secondary_text}
-              </Text>
+    <Modal {...props} animationType="slide" statusBarTranslucent>
+      <SafeAreaView style={{ height: '100%' }}>
+        <GooglePlacesAutocomplete
+          ref={ref}
+          enablePoweredByContainer={false}
+          placeholder="ค้นหาสถานที่"
+          onPress={handleSelectPlace}
+          styles={{
+            container: styles.container,
+            textInputContainer: styles.textInputContainer,
+            textInput: styles.textInput
+          }}
+          fetchDetails
+          renderLeftButton={() => <Feather name="search" size={20} />}
+          renderRow={(data) => (
+            <View row gap-12>
+              <FontAwesome5
+                name="map-marker-alt"
+                size={20}
+                color={Colors.red40}
+              />
+              <View>
+                <Text>{data.structured_formatting.main_text}</Text>
+                <Text style={{ fontSize: 12 }}>
+                  {data.structured_formatting.secondary_text}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
-        GooglePlacesDetailsQuery={{
-          fields: 'geometry,name,place_id',
-          sessiontoken: autocompleteSessionToken
-        }}
-        query={{
-          key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
-          language: 'th',
-          components: 'country:th',
-          sessiontoken: autocompleteSessionToken
-        }}
-        onFail={(error) => console.error(error)}
-      />
+          )}
+          GooglePlacesDetailsQuery={{
+            fields: 'geometry,name,place_id',
+            sessiontoken: autocompleteSessionToken
+          }}
+          query={{
+            key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
+            language: 'th',
+            components: 'country:th',
+            sessiontoken: autocompleteSessionToken
+          }}
+          onFail={(error) => console.error(error)}
+        />
+      </SafeAreaView>
     </Modal>
   )
 }
@@ -88,7 +91,8 @@ export default function PlaceAutocompleteModal(props: Props) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    padding: 15
+    paddingHorizontal: 15,
+    paddingTop: 10
   },
   textInputContainer: {
     alignItems: 'center',
