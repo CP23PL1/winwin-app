@@ -1,9 +1,16 @@
 import axios from 'axios'
-import { GetRoutesRequest, GetRoutesResponse } from './type'
+import {
+  GetReverseGeocodeResponse,
+  GetRoutesRequest,
+  GetRoutesResponse
+} from './type'
+import { LatLng } from 'react-native-maps'
 
 class GoogleApi {
   private readonly ROUTES_API_KEY = 'AIzaSyDlofTNj3uW2LX_5PyRsakpPtfhzFx93-s'
-  getRoutes(data: GetRoutesRequest) {
+  private readonly PLACES_API_KEY = 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo'
+
+  async getRoutes(data: GetRoutesRequest) {
     return axios
       .post<GetRoutesResponse>(
         'https://routes.googleapis.com/directions/v2:computeRoutes',
@@ -17,6 +24,24 @@ class GoogleApi {
         }
       )
       .then((res) => res.data)
+  }
+
+  async reverseGeocode(
+    latLng: LatLng,
+    resultType: string | undefined = 'street_address'
+  ) {
+    return axios
+      .get<GetReverseGeocodeResponse>(
+        'https://maps.googleapis.com/maps/api/geocode/json',
+        {
+          params: {
+            latlng: `${latLng.latitude},${latLng.longitude}`,
+            key: this.PLACES_API_KEY,
+            result_type: resultType
+          }
+        }
+      )
+      .then((res) => res.data.results[0])
   }
 }
 

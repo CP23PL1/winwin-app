@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import {
   GooglePlaceData,
-  GooglePlaceDetail,
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete'
@@ -10,24 +9,33 @@ import { Colors, Modal, ModalProps, View, Text } from 'react-native-ui-lib'
 import { FontAwesome5, Feather } from '@expo/vector-icons'
 import uuid from 'react-native-uuid'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { GeoPosition } from 'react-native-geolocation-service'
+import { MaskedPlaceDetail } from '../apis/google/type'
 
 type Props = ModalProps & {
+  location?: GeoPosition | null
+  fields?: string
   onSelectPlace: (
     data: GooglePlaceData,
-    detail: GooglePlaceDetail | null
+    detail: MaskedPlaceDetail | null
   ) => void
 }
 
-export default function PlaceAutocompleteModal(props: Props) {
+export default function PlaceAutocompleteModal({
+  location,
+  onSelectPlace,
+  fields = 'geometry,name,place_id',
+  ...props
+}: Props) {
   const [autocompleteSessionToken, setAutocompleteSessionToken] =
     useState<string>(uuid.v4().toString())
 
   const handleSelectPlace = useCallback(
-    (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
-      props.onSelectPlace(data, detail)
+    (data: GooglePlaceData, detail: MaskedPlaceDetail | null) => {
+      onSelectPlace(data, detail)
       setAutocompleteSessionToken(uuid.v4().toString())
     },
-    [props.onSelectPlace]
+    [onSelectPlace]
   )
 
   const ref = useRef<GooglePlacesAutocompleteRef | null>(null)
@@ -72,13 +80,18 @@ export default function PlaceAutocompleteModal(props: Props) {
             </View>
           )}
           GooglePlacesDetailsQuery={{
-            fields: 'geometry,name,place_id',
+            fields,
             sessiontoken: autocompleteSessionToken
           }}
           query={{
             key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
             language: 'th',
             components: 'country:th',
+            strictbounds: true,
+            location: location
+              ? `${location.coords.latitude},${location.coords.longitude}`
+              : undefined,
+            radius: 10000,
             sessiontoken: autocompleteSessionToken
           }}
           onFail={(error) => console.error(error)}

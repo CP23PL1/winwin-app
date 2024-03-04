@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
-import * as Location from 'expo-location'
+import { Platform } from 'react-native'
+import Geolocation from 'react-native-geolocation-service'
 
 export function useLocation() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(null)
-  const [error, setError] = useState('')
+  const [location, setLocation] = useState<Geolocation.GeoPosition | null>(null)
+  const [error, setError] = useState<Geolocation.GeoError | null>(null)
 
   const getCurrentPositionAsync = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync()
-    if (status !== 'granted') {
-      throw new Error('Permission to access location was denied')
+    if (Platform.OS === 'ios') {
+      const status = await Geolocation.requestAuthorization('always')
+      if (status !== 'granted') {
+        throw new Error('Permission to access location was denied')
+      }
     }
     console.log('Permission granted')
     console.log('Getting current location')
-    const location = await Location.getCurrentPositionAsync({})
+    const location = await new Promise(Geolocation.getCurrentPosition)
     console.log('Got current location')
     console.log(
       `Location: ${location.coords.latitude}, ${location.coords.longitude}`

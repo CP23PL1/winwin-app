@@ -1,21 +1,22 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { View, Colors, Text, TouchableOpacity } from 'react-native-ui-lib'
 import { FontAwesome5 } from '@expo/vector-icons'
-import {
-  GooglePlaceData,
-  GooglePlaceDetail
-} from 'react-native-google-places-autocomplete'
+import { GooglePlaceData } from 'react-native-google-places-autocomplete'
 import { StyleSheet } from 'react-native'
 import PlaceAutocompleteModal from './PlaceAutocompleteModal'
+import { GeoPosition } from 'react-native-geolocation-service'
+import { MaskedPlaceDetail } from '../apis/google/type'
 
 type Props = {
-  origin: GooglePlaceDetail | null
-  destination: GooglePlaceDetail | null
-  onOriginChange: (origin: GooglePlaceDetail) => void
-  onDestinationChange: (destination: GooglePlaceDetail) => void
+  currentLocation?: GeoPosition | null
+  origin: MaskedPlaceDetail | null
+  destination: MaskedPlaceDetail | null
+  onOriginChange: (origin: MaskedPlaceDetail) => void
+  onDestinationChange: (destination: MaskedPlaceDetail) => void
 }
 
 export default function RouteCard({
+  currentLocation,
   origin,
   destination,
   onOriginChange,
@@ -27,12 +28,18 @@ export default function RouteCard({
   const [openPlaceAutocompleteModal, setOpenPlaceAutocompleteModal] =
     useState(false)
 
+  const originName = useMemo(() => {
+    if (origin) return origin.name
+    if (currentLocation) return 'ตำแหน่งปัจจุบัน'
+    return 'เลือกจุดรับ'
+  }, [origin, currentLocation])
+
   const handleWaypointPress = (waypoint: 'origin' | 'destination') => {
     setCurrentWaypoint(waypoint)
     setOpenPlaceAutocompleteModal(true)
   }
   const handlePlaceSelected = useCallback(
-    (data: GooglePlaceData, detail: GooglePlaceDetail | null) => {
+    (data: GooglePlaceData, detail: MaskedPlaceDetail | null) => {
       setOpenPlaceAutocompleteModal(false)
       if (!detail) return
       if (currentWaypoint === 'origin') {
@@ -71,7 +78,7 @@ export default function RouteCard({
             />
             <TouchableOpacity onPress={() => handleWaypointPress('origin')}>
               <Text color={Colors.blue40} style={{ opacity: 0.6 }}>
-                {origin?.name || 'เลือกจุดรับ'}
+                {originName}
               </Text>
             </TouchableOpacity>
           </View>
@@ -94,6 +101,7 @@ export default function RouteCard({
         </View>
       </View>
       <PlaceAutocompleteModal
+        location={currentLocation}
         visible={openPlaceAutocompleteModal}
         onRequestClose={() => setOpenPlaceAutocompleteModal(false)}
         onSelectPlace={handlePlaceSelected}

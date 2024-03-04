@@ -1,18 +1,18 @@
 import { Stack, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
 import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
-import { useLocation } from '../../hooks/useLocation'
-import ServiceSpotList from '../../components/service-spots/ServiceSpotList'
-import { ServiceSpotListItemPressHandler } from '../../components/service-spots/ServiceSpotListItem'
+import { useLocation } from '../../../hooks/useLocation'
+import ServiceSpotList from '../../../components/service-spots/ServiceSpotList'
+import { ServiceSpotListItemPressHandler } from '../../../components/service-spots/ServiceSpotListItem'
 import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
 import { useQuery } from '@tanstack/react-query'
-import { serviceSpotsApi } from '../../apis/service-spots'
-import { NEARBY_RADIUS } from '../../constants/service-spots'
+import { serviceSpotsApi } from '../../../apis/service-spots'
+import { NEARBY_RADIUS } from '../../../constants/service-spots'
 import { useAuth0 } from 'react-native-auth0'
 
 export default function ServiceSpots() {
   const router = useRouter()
-  const { clearCredentials } = useAuth0()
+  const { clearSession } = useAuth0()
   const { location } = useLocation()
 
   const [refreshing, setRefreshing] = useState(false)
@@ -39,7 +39,7 @@ export default function ServiceSpots() {
   }, [])
 
   const signOut = () => {
-    clearCredentials()
+    clearSession()
   }
 
   return (

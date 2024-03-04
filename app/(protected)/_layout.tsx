@@ -1,14 +1,12 @@
-import { Redirect, Stack, useNavigation } from 'expo-router'
-import { Colors, LoaderScreen, Text } from 'react-native-ui-lib'
-import { Entypo } from '@expo/vector-icons'
-import { StyleSheet } from 'react-native'
+import { Redirect, Slot } from 'expo-router'
+import { LoaderScreen } from 'react-native-ui-lib'
+
 import { useAuth0 } from 'react-native-auth0'
 import { useQuery } from '@tanstack/react-query'
 import { usersApi } from '../../apis/users'
+import DriveRequestContextProvider from '../../contexts/DriveRequestContext'
 
 export default function ProtectedLayout() {
-  const navigation = useNavigation()
-
   const { user, isLoading: isAuth0Loading } = useAuth0()
 
   const { data: userInfo, isLoading: isUserInfoLoading } = useQuery({
@@ -29,38 +27,8 @@ export default function ProtectedLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerLeft: (props) =>
-          props.canGoBack && (
-            <Entypo
-              name="chevron-thin-left"
-              size={24}
-              color="white"
-              onPress={navigation.goBack}
-            />
-          ),
-        headerTitle: (props) => (
-          <Text h4 white>
-            {props?.children || 'Loading...'}
-          </Text>
-        ),
-        headerStyle: {
-          backgroundColor: Colors.$backgroundPrimaryHeavy
-        },
-        headerBackVisible: false,
-        headerTitleAlign: 'center',
-        headerShadowVisible: false,
-        statusBarTranslucent: true,
-        navigationBarHidden: true,
-        contentStyle: [styles.container]
-      }}
-    />
+    <DriveRequestContextProvider>
+      <Slot />
+    </DriveRequestContextProvider>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#F0F0F0'
-  }
-})
