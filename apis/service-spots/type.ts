@@ -1,5 +1,5 @@
 import { Driver } from '../drivers/type'
-import { SubDistrict } from '../shared/type'
+import { Coordinate, SubDistrict } from '../shared/type'
 
 export type ServiceSpot = {
   id: number
@@ -12,11 +12,6 @@ export type ServiceSpot = {
   priceRateImageUrl: string
   serviceSpotOwner: Driver
   distance?: number
-}
-
-export type Coordinate = {
-  lat: number
-  lng: number
 }
 
 export type GetNearbyServiceSpotsParams = Coordinate & {

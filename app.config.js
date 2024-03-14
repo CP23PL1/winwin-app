@@ -42,13 +42,6 @@ module.exports = {
   plugins: [
     'expo-router',
     [
-      'expo-location',
-      {
-        locationAlwaysAndWhenInUsePermission:
-          'Allow $(PRODUCT_NAME) to use your location.'
-      }
-    ],
-    [
       'react-native-auth0',
       {
         domain: 'cp23pl1-kmutt.jp.auth0.com'

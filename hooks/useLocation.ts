@@ -8,7 +8,7 @@ export function useLocation() {
 
   const getCurrentPositionAsync = async () => {
     if (Platform.OS === 'ios') {
-      const status = await Geolocation.requestAuthorization('always')
+      const status = await Geolocation.requestAuthorization('whenInUse')
       if (status !== 'granted') {
         throw new Error('Permission to access location was denied')
       }

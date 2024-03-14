@@ -9,7 +9,6 @@ import MapView, {
   Region
 } from 'react-native-maps'
 import { LoaderScreen, View } from 'react-native-ui-lib'
-import { useLocation } from '../../../hooks/useLocation'
 import { StyleSheet } from 'react-native'
 import { Slot, router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
@@ -20,14 +19,11 @@ import ServiceSpotCallout from '../../../components/service-spots/ServiceSpotCal
 import { isAxiosError } from 'axios'
 import { mapUtil } from '../../../utils/map'
 import { googleApi } from '../../../apis/google'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import RouteCard from '../../../components/RouteCard'
 import { useDriveRequestContext } from '../../../contexts/DriveRequestContext'
 
 export default function MainLayout() {
-  const { route, origin, setOrigin, destination, setDestination, setRoute } =
+  const { location, route, origin, setOrigin, destination, setRoute } =
     useDriveRequestContext()
-  const { location } = useLocation()
   const map = useRef<MapView | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
@@ -90,7 +86,6 @@ export default function MainLayout() {
           left: 100
         }
       })
-      router.push('/(protected)/(main)/detailed')
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error.response?.data)
@@ -175,15 +170,6 @@ export default function MainLayout() {
           </Marker>
         ))}
       </MapView>
-      <SafeAreaView style={{ marginTop: 10, alignItems: 'center' }}>
-        <RouteCard
-          currentLocation={location}
-          origin={origin}
-          destination={destination}
-          onOriginChange={setOrigin}
-          onDestinationChange={setDestination}
-        />
-      </SafeAreaView>
       <Slot />
     </View>
   )

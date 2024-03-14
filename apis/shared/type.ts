@@ -1,3 +1,8 @@
+export type Coordinate = {
+  lat: number
+  lng: number
+}
+
 export type Address = {
   id: number
   nameTH: string
