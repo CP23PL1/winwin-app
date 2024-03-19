@@ -16,7 +16,6 @@ module.exports = {
     supportsTablet: true,
     bundleIdentifier: 'com.cp23pl1.winwin'
   },
-
   android: {
     version: process.env.APP_VERSION || '1.0.0',
     package: 'com.cp23pl1.winwin',
@@ -56,5 +55,8 @@ module.exports = {
     eas: {
       projectId: 'fae1874b-ea74-4aa1-bf98-fc6f5bbdc194'
     }
+  },
+  experiments: {
+    tsconfigPaths: true
   }
 }
