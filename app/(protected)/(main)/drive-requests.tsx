@@ -1,21 +1,31 @@
 import { StyleSheet } from 'react-native'
-import { Colors, Image, Text, View } from 'react-native-ui-lib'
+import {
+  Button,
+  Colors,
+  Image,
+  Text,
+  TextField,
+  View
+} from 'react-native-ui-lib'
 import {
   DriveRequestStatus,
   useDriveRequestContext
 } from '../../../contexts/DriveRequestContext'
 import { Redirect } from 'expo-router'
 import Waypoint from '../../../components/Waypoint'
+import { useState } from 'react'
 
 export default function DriveRequestScreen() {
-  const { route, origin, destination, driveRequest } = useDriveRequestContext()
+  const { route, origin, destination, driveRequest, sendChatMessage } =
+    useDriveRequestContext()
 
   if (!route || !origin || !destination) {
     return <Redirect href="/" />
   }
-  console.log(driveRequest)
 
-  return driveRequest?.status === DriveRequestStatus.PENDING ? (
+  const [text, setText] = useState('')
+
+  return !driveRequest?.status ? (
     <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
       <Text>รอการตอบรับจากคนขับรถ</Text>
     </View>
@@ -33,7 +43,6 @@ export default function DriveRequestScreen() {
           styles={{ placeNameStyle: { fontSize: 16 } }}
         />
       </View>
-
       <View>
         <View row centerV spread>
           <Text bodyB>รหัสเรียกรถ</Text>
@@ -47,15 +56,16 @@ export default function DriveRequestScreen() {
 
       <View row centerV gap-10>
         <Image
-          src={driveRequest?.driver.profileImage}
+          src={driveRequest.driver.info.profileImage}
           alt=""
           style={{ width: 60, height: 60, borderRadius: 60 }}
         />
         <View>
           <Text bodyB>
-            {driveRequest?.driver.firstName} {driveRequest?.driver.lastName}
+            {driveRequest.driver.info.firstName}{' '}
+            {driveRequest.driver.info.lastName}
           </Text>
-          <Text caption>วินหลายเลข {driveRequest?.driver.no}</Text>
+          <Text caption>วินหลายเลข {driveRequest.driver.info.no}</Text>
         </View>
       </View>
     </View>

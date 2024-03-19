@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Text, View } from 'react-native-ui-lib'
@@ -8,6 +8,7 @@ import { SERVICE_CHARGE } from '../../../constants/service-spots'
 import { useDriveRequestContext } from '../../../contexts/DriveRequestContext'
 import { router } from 'expo-router'
 import RouteCard from '../../../components/RouteCard'
+import { useMutation } from '@tanstack/react-query'
 
 export default function MainScreen() {
   const {
@@ -20,11 +21,6 @@ export default function MainScreen() {
     setDestination,
     createDriveRequest
   } = useDriveRequestContext()
-
-  const handleDriveRequestRequested = useCallback(async () => {
-    await createDriveRequest()
-    router.push('/drive-requests')
-  }, [createDriveRequest])
 
   return !route ? (
     <SafeAreaView style={{ marginTop: 10, alignItems: 'center' }}>
@@ -61,7 +57,7 @@ export default function MainScreen() {
         <Button
           label="เรียกรับบริการ"
           disabled={!route}
-          onPress={handleDriveRequestRequested}
+          onPress={createDriveRequest}
         />
       </View>
     </View>

@@ -13,6 +13,8 @@ import { User } from '../apis/users/type'
 import { auth0AuthCallback, socketManager } from '../libs/socket-client'
 import { useLocation } from '../hooks/useLocation'
 import { GeoPosition } from 'react-native-geolocation-service'
+import Toast from 'react-native-toast-message'
+import { router } from 'expo-router'
 
 export type CreateDriveRequest = {
   origin: Coordinate
@@ -28,16 +30,23 @@ export enum DriveRequestStatus {
   COMPLETED = 'completed'
 }
 
+export type RequestDrive = {
+  origin: MaskedPlaceDetail
+  destination: MaskedPlaceDetail
+  route: Route
+}
+
 export type DriveRequest = {
-  id: number
+  id?: number
   user: User
-  driver: any
+  driver?: any
   origin: Coordinate
   destination: Coordinate
-  status: DriveRequestStatus
-  refCode: string
-  createdAt: string
-  updatedAt: string
+  status?: DriveRequestStatus
+  refCode?: string
+  createdAt?: string
+  updatedAt?: string
+  route: Route
 }
 
 type DriveRequestContextT = {
@@ -51,6 +60,7 @@ type DriveRequestContextT = {
   setRoute: (route: Route) => void
   driveRequest: DriveRequest | null
   createDriveRequest: () => Promise<void>
+  sendChatMessage: (message: string) => void
 }
 
 const DriveRequestContext = createContext<DriveRequestContextT>(
@@ -86,44 +96,65 @@ export default function DriveRequestContextProvider({
 
   const createDriveRequest = useCallback(async () => {
     if (!origin || !destination || !route) return
-    if (!driveRequestsSocket.connected) {
-      driveRequestsSocket.connect()
+    const payload: RequestDrive = {
+      origin,
+      destination,
+      route
     }
-    const newDriveRequest = await driveRequestsSocket.emitWithAck(
-      'drive-requests:create',
-      {
-        origin,
-        destination,
-        route
-      }
-    )
-    setDriveRequest(newDriveRequest)
+    driveRequestsSocket.emit('request-drive', payload)
   }, [driveRequestsSocket, origin, destination, route])
+
+  const sendChatMessage = useCallback(
+    (message: string) => {
+      if (!driveRequest) return
+      driveRequestsSocket.emit('drive-requests:chat', {
+        driveRequestId: driveRequest.id,
+        message
+      })
+    },
+    [driveRequest]
+  )
+
+  const handleDriveRequested = (data: DriveRequest) => {
+    router.push('/drive-requests')
+    setDriveRequest(data)
+  }
+
+  const handleDriveRequestChat = (data: any) => {
+    console.log(data)
+  }
+
+  const handleDriveRequestRejected = useCallback(() => {
+    createDriveRequest()
+  }, [driveRequest, origin, destination, route])
+
+  useEffect(() => {
+    driveRequestsSocket.connect()
+
+    return () => {
+      driveRequestsSocket.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     const handleException = (data: any) => {
-      console.error(data)
+      Toast.show({
+        type: 'error',
+        text1: 'เกิดข้อผิดพลาด',
+        text2: data.message
+      })
     }
 
-    const handleDriveRequestUpdated = (driveRequest: DriveRequest) => {
-      console.log(driveRequest)
-      setDriveRequest((prev) => ({
-        ...prev,
-        ...driveRequest
-      }))
-    }
-
-    driveRequestsSocket.on('drive-requests:updated', handleDriveRequestUpdated)
+    driveRequestsSocket.on('drive-requested', handleDriveRequested)
+    driveRequestsSocket.on('drive-requests:chat', handleDriveRequestChat)
+    driveRequestsSocket.on('drive-request-rejected', handleDriveRequestRejected)
     driveRequestsSocket.on('exception', handleException)
 
     return () => {
-      driveRequestsSocket.off(
-        'drive-requests:updated',
-        handleDriveRequestUpdated
-      )
+      driveRequestsSocket.off('drive-requested', handleDriveRequested)
       driveRequestsSocket.off('exception', handleException)
     }
-  }, [])
+  }, [handleDriveRequestRejected])
 
   return (
     <DriveRequestContext.Provider
@@ -137,7 +168,8 @@ export default function DriveRequestContextProvider({
         setDestination,
         setRoute,
         driveRequest,
-        createDriveRequest
+        createDriveRequest,
+        sendChatMessage
       }}
     >
       {children}

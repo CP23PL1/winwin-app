@@ -5,6 +5,8 @@ import { QueryClientProvider } from '../providers/query-client'
 import 'react-native-url-polyfill/auto'
 import { DesignSystem } from '../utils/design-system'
 import { Auth0Provider } from 'react-native-auth0'
+import Toast from 'react-native-toast-message'
+import { toastConfig } from '../libs/toasts'
 
 DesignSystem.setup()
 SplashScreen.preventAutoHideAsync()
@@ -35,6 +37,7 @@ function RootLayout() {
       >
         <Slot />
       </Auth0Provider>
+      <Toast config={toastConfig} />
     </QueryClientProvider>
   )
 }
