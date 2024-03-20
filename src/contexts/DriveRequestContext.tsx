@@ -13,7 +13,7 @@ import { GeoPosition } from 'react-native-geolocation-service'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
 import { DriveRequest, RequestDrive } from '@/sockets/drive-request/type'
-import { driveRequestsSocket } from '@/sockets/drive-request'
+import { driveRequestSocket } from '@/sockets/drive-request'
 
 type Props = {
   children: React.ReactNode
@@ -43,8 +43,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const [destination, setDestination] = useState<MaskedPlaceDetail | null>(null)
   const [driveRequest, setDriveRequest] = useState<DriveRequest | null>(null)
 
-  const [isLoading, setIsLoading] = useState(false)
-
   const price = useMemo(
     () =>
       route?.distanceMeters
@@ -60,14 +58,12 @@ export default function DriveRequestContextProvider({ children }: Props) {
       destination,
       route
     }
-    driveRequestsSocket.emit('request-drive', payload)
-    setIsLoading(true)
-  }, [driveRequestsSocket, origin, destination, route])
+    driveRequestSocket.emit('request-drive', payload)
+  }, [driveRequestSocket, origin, destination, route])
 
-  const handleDriveRequested = useCallback((data: DriveRequest) => {
-    router.push('/drive-request')
+  const handleDriveRequestCreated = useCallback((data: DriveRequest) => {
     setDriveRequest(data)
-    setIsLoading(false)
+    router.push('/drive-request')
   }, [])
 
   const handleDriveRequestRejected = useCallback(() => {
@@ -88,26 +84,26 @@ export default function DriveRequestContextProvider({ children }: Props) {
 
   // Handle socket io events on mount with cleanup
   useEffect(() => {
-    driveRequestsSocket.on('drive-requested', handleDriveRequested)
-    driveRequestsSocket.on('drive-request-rejected', handleDriveRequestRejected)
-    driveRequestsSocket.on('exception', handleException)
+    driveRequestSocket.on('drive-request-created', handleDriveRequestCreated)
+    driveRequestSocket.on('drive-request-rejected', handleDriveRequestRejected)
+    driveRequestSocket.on('exception', handleException)
 
     return () => {
-      driveRequestsSocket.off('drive-requested', handleDriveRequested)
-      driveRequestsSocket.off(
+      driveRequestSocket.off('drive-request-created', handleDriveRequestCreated)
+      driveRequestSocket.off(
         'drive-request-rejected',
         handleDriveRequestRejected
       )
-      driveRequestsSocket.off('exception', handleException)
+      driveRequestSocket.off('exception', handleException)
     }
-  }, [handleDriveRequested, handleDriveRequestRejected, handleException])
+  }, [handleDriveRequestCreated, handleDriveRequestRejected, handleException])
 
   // Handle socket io connection on mount with cleanup
   useEffect(() => {
-    driveRequestsSocket.connect()
+    driveRequestSocket.connect()
 
     return () => {
-      driveRequestsSocket.disconnect()
+      driveRequestSocket.disconnect()
     }
   }, [])
 
@@ -119,10 +115,10 @@ export default function DriveRequestContextProvider({ children }: Props) {
         origin,
         destination,
         price,
+        driveRequest,
         setOrigin,
         setDestination,
         setRoute,
-        driveRequest,
         requestDrive
       }}
     >

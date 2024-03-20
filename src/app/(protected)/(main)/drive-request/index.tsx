@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native'
 import { Colors, Image, Text, View } from 'react-native-ui-lib'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
-import { Redirect } from 'expo-router'
+import { Redirect, Stack, router } from 'expo-router'
 import Waypoint from '@/components/Waypoint'
 import { DriveRequestStatus } from '@/sockets/drive-request/type'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function DriveRequestScreen() {
   const { route, origin, destination, driveRequest } = useDriveRequestContext()
@@ -41,19 +42,26 @@ export default function DriveRequestScreen() {
         </View>
       </View>
 
-      <View row centerV gap-10>
-        <Image
-          src={driveRequest.driver.info.profileImage}
-          alt=""
-          style={{ width: 60, height: 60, borderRadius: 60 }}
-        />
-        <View>
-          <Text bodyB>
-            {driveRequest.driver.info.firstName}{' '}
-            {driveRequest.driver.info.lastName}
-          </Text>
-          <Text caption>วินหลายเลข {driveRequest.driver.info.no}</Text>
+      <View row spread centerV>
+        <View row centerV gap-10>
+          <Image
+            src={driveRequest.driver.info.profileImage}
+            alt=""
+            style={{ width: 60, height: 60, borderRadius: 60 }}
+          />
+          <View>
+            <Text bodyB>
+              {driveRequest.driver.info.firstName}{' '}
+              {driveRequest.driver.info.lastName}
+            </Text>
+            <Text caption>วินหลายเลข {driveRequest.driver.info.no}</Text>
+          </View>
         </View>
+        <Ionicons
+          name="chatbubble-ellipses-outline"
+          size={32}
+          onPress={() => router.push('/drive-request/chat')}
+        />
       </View>
     </View>
   ) : driveRequest?.status === DriveRequestStatus.REJECTED ? (

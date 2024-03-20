@@ -37,7 +37,9 @@ class GoogleApi {
           params: {
             latlng: `${latLng.latitude},${latLng.longitude}`,
             key: this.PLACES_API_KEY,
-            result_type: resultType
+            result_type: resultType,
+            region: 'th',
+            language: 'th'
           }
         }
       )

@@ -31,40 +31,43 @@ export default function MainScreen() {
       />
     </SafeAreaView>
   ) : (
-    <View absB absL bg-white padding-15 style={styles.footer}>
-      <View paddingH-15 marginB-15>
-        <View row spread centerV>
-          <Text caption>ระยะทางและเวลา</Text>
-          <Text h5B>
-            {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที (
-            {serviceSpotUtil.getDistanceText(route.distanceMeters)})
-          </Text>
+    <View
+      absB
+      absL
+      bg-white
+      padding-15
+      gap-15
+      width="100%"
+      style={styles.footer}
+    >
+      <View padding-5 gap-10>
+        <Text h3B>
+          {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที (
+          {serviceSpotUtil.getDistanceText(route.distanceMeters)})
+        </Text>
+        <View>
+          <View row spread centerV>
+            <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
+            <Text body>{commonUtil.formatCurrency(price)}</Text>
+          </View>
+          <View row spread centerV>
+            <Text caption>ค่าเรียก</Text>
+            <Text body>{commonUtil.formatCurrency(SERVICE_CHARGE)}</Text>
+          </View>
+          <View row spread centerV>
+            <Text caption>ทั้งหมด</Text>
+            <Text h5B>{commonUtil.formatCurrency(price + SERVICE_CHARGE)}</Text>
+          </View>
         </View>
-        <View row spread centerV>
-          <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-          <Text body>{commonUtil.formatCurrency(price)}</Text>
-        </View>
-        <View row spread centerV>
-          <Text caption>ค่าเรียก</Text>
-          <Text body>{commonUtil.formatCurrency(SERVICE_CHARGE)}</Text>
-        </View>
-        <View row spread centerV>
-          <Text caption>ทั้งหมด</Text>
-          <Text h5B>{commonUtil.formatCurrency(price + SERVICE_CHARGE)}</Text>
-        </View>
-        <Button
-          label="เรียกรับบริการ"
-          disabled={!route}
-          onPress={requestDrive}
-        />
       </View>
+
+      <Button label="เรียกรับบริการ" disabled={!route} onPress={requestDrive} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   footer: {
-    width: '100%',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30
   }
