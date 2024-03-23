@@ -1,37 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  TextField,
-  Button,
-  Colors,
-  Image
-} from 'react-native-ui-lib'
-import { Redirect, Stack, router, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { View, Text, TextField, Button } from 'react-native-ui-lib'
+import { Redirect, Stack } from 'expo-router'
 import { Entypo } from '@expo/vector-icons'
-import { StyleSheet } from 'react-native'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
-import { FlatList } from 'react-native-gesture-handler'
 import { driveRequestSocket } from '@/sockets/drive-request'
-import moment from 'moment'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
-type IncomingChatPayload = {
-  sender: string
-  message: string
-  timestamp: Date
-}
-
-type ChatPayload = {
-  to: string
-  message: string
-}
+import ChatHeader from '@/components/chat/ChatHeader'
+import ChatMessageList from '@/components/chat/ChatMessageList'
 
 export default function DriveRequestChat() {
   const { driveRequest } = useDriveRequestContext()
   const [text, onChangeText] = useState('')
-  const [chatMessages, setChatMessages] = useState<IncomingChatPayload[]>([])
+  const [messages, setChatMessages] = useState<ChatMessage[]>([])
 
   const sendChatMessage = (message: string) => {
     if (!driveRequest?.id) {
@@ -39,17 +19,24 @@ export default function DriveRequestChat() {
       return
     }
     if (!message) return
-
-    const payload: ChatPayload = {
-      to: driveRequest.user.id,
+    const payload: ChatMessagePayload = {
+      to: driveRequest.driver.id,
       message
     }
     driveRequestSocket.emit('chat-message', payload)
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        from: driveRequest.user.id,
+        to: driveRequest.driver.id,
+        content: message,
+        timestamp: new Date().toISOString()
+      }
+    ])
     onChangeText('')
   }
 
-  const handleChatMessageReceived = useCallback((data: IncomingChatPayload) => {
-    console.log('Chat message received', data)
+  const handleChatMessageReceived = useCallback((data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data])
   }, [])
 
@@ -69,84 +56,15 @@ export default function DriveRequestChat() {
       <Stack.Screen
         options={{
           header: () => (
-            <SafeAreaView
-              style={{
-                backgroundColor: 'white',
-                elevation: 10,
-                padding: 20
-              }}
-            >
-              <View row gap-10>
-                <Button
-                  none
-                  avoidMinWidth
-                  avoidInnerPadding
-                  onPress={router.back}
-                >
-                  <Ionicons name="arrow-back" size={24} color={Colors.black} />
-                </Button>
-                <View row gap-10 centerV>
-                  <Image
-                    src={driveRequest.driver.info.profileImage}
-                    style={{ width: 40, height: 40, borderRadius: 40 }}
-                  />
-                  <View>
-                    <Text h5B>
-                      {driveRequest.driver.info.firstName}{' '}
-                      {driveRequest.driver.info.lastName}
-                    </Text>
-                    <Text caption>
-                      วินหมายเลข {driveRequest.driver.info.no}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </SafeAreaView>
+            <ChatHeader
+              title={`${driveRequest.driver.info.firstName} ${driveRequest.driver.info.lastName}`}
+              description={`วินหมายเลข ${driveRequest.driver.info.no}`}
+              image={driveRequest.driver.info.profileImage}
+            />
           )
         }}
       />
-      <FlatList
-        style={styles.chatContainer}
-        data={chatMessages}
-        renderItem={(chatItem) => (
-          <View
-            style={[
-              {
-                alignItems:
-                  chatItem.item.sender === driveRequest.user.id
-                    ? 'flex-end'
-                    : 'flex-start',
-                marginVertical: 5
-              }
-            ]}
-          >
-            <View
-              paddingH-16
-              paddingV-8
-              br60
-              backgroundColor={
-                chatItem.item.sender === driveRequest.user.id
-                  ? Colors.$backgroundPrimaryHeavy
-                  : Colors.rgba(222, 222, 222, 1)
-              }
-            >
-              <Text
-                style={styles.chatMessage}
-                color={
-                  chatItem.item.sender === driveRequest.user.id
-                    ? Colors.white
-                    : Colors.black
-                }
-              >
-                {chatItem.item.message}
-              </Text>
-            </View>
-            <Text caption color="gray">
-              {moment(chatItem.item.timestamp).format('HH:mm')}
-            </Text>
-          </View>
-        )}
-      />
+      <ChatMessageList user={driveRequest.user} messages={messages} />
       <View row bg-white width={'100%'} paddingV-10>
         <View flex-1 center paddingH-15>
           <Button none>
@@ -182,20 +100,3 @@ export default function DriveRequestChat() {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  chatContainer: {
-    flexGrow: 1,
-    padding: 15
-  },
-
-  chatMessage: {
-    flexShrink: 1
-  },
-  sender: {
-    backgroundColor: Colors.$backgroundPrimaryHeavy
-  },
-  receiver: {
-    backgroundColor: Colors.rgba(222, 222, 222, 1)
-  }
-})

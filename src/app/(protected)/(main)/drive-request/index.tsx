@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 import { Colors, Image, Text, View } from 'react-native-ui-lib'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { Redirect, Stack, router } from 'expo-router'
@@ -7,26 +7,44 @@ import { DriveRequestStatus } from '@/sockets/drive-request/type'
 import { Ionicons } from '@expo/vector-icons'
 
 export default function DriveRequestScreen() {
-  const { route, origin, destination, driveRequest } = useDriveRequestContext()
+  const { isRequesting, origin, destination, driveRequest } =
+    useDriveRequestContext()
 
-  if (!route || !origin || !destination) {
+  if (isRequesting) {
+    return (
+      <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
+        <ActivityIndicator
+          size="large"
+          color={Colors.$backgroundPrimaryHeavy}
+        />
+        <Text center>โปรดรอสักครู่ เรากำลังหาคนขับให้คุณ...</Text>
+      </View>
+    )
+  }
+
+  if (!driveRequest) {
     return <Redirect href="/" />
   }
 
-  return !driveRequest?.status ? (
+  return (
     <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
-      <Text>รอการตอบรับจากคนขับรถ</Text>
-    </View>
-  ) : driveRequest?.status === DriveRequestStatus.ACCEPTED ? (
-    <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
+      <View>
+        {driveRequest.status === DriveRequestStatus.ACCEPTED ? (
+          <Text h4B>คนขับกำลังมารับคุณ</Text>
+        ) : driveRequest.status === DriveRequestStatus.PICKED_UP ? (
+          <Text h4B>คุณกำลังเดินทางไปยังที่หมาย</Text>
+        ) : (
+          <></>
+        )}
+      </View>
       <View gap-10>
         <Waypoint
-          placeDetail={origin}
+          placeDetail={origin!}
           color={Colors.blue40}
           styles={{ placeNameStyle: { fontSize: 16 } }}
         />
         <Waypoint
-          placeDetail={destination}
+          placeDetail={destination!}
           color={Colors.red40}
           styles={{ placeNameStyle: { fontSize: 16 } }}
         />
@@ -64,11 +82,7 @@ export default function DriveRequestScreen() {
         />
       </View>
     </View>
-  ) : driveRequest?.status === DriveRequestStatus.REJECTED ? (
-    <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
-      <Text>คำขอถูกปฏิเสธ</Text>
-    </View>
-  ) : null
+  )
 }
 
 const styles = StyleSheet.create({

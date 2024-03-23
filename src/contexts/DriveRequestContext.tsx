@@ -26,6 +26,7 @@ type DriveRequestContextT = {
   destination: MaskedPlaceDetail | null
   price: number
   driveRequest: DriveRequest | null
+  isRequesting: boolean
   setOrigin: (origin: MaskedPlaceDetail) => void
   setDestination: (destination: MaskedPlaceDetail) => void
   setRoute: (route: Route) => void
@@ -42,6 +43,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const [origin, setOrigin] = useState<MaskedPlaceDetail | null>(null)
   const [destination, setDestination] = useState<MaskedPlaceDetail | null>(null)
   const [driveRequest, setDriveRequest] = useState<DriveRequest | null>(null)
+  const [isRequesting, setIsRequesting] = useState(false)
 
   const price = useMemo(
     () =>
@@ -53,18 +55,29 @@ export default function DriveRequestContextProvider({ children }: Props) {
 
   const requestDrive = useCallback(() => {
     if (!origin || !destination || !route) return
+    driveRequestSocket.connect()
     const payload: RequestDrive = {
       origin,
       destination,
       route
     }
     driveRequestSocket.emit('request-drive', payload)
+    router.push('/drive-request')
+    setIsRequesting(true)
   }, [driveRequestSocket, origin, destination, route])
 
   const handleDriveRequestCreated = useCallback((data: DriveRequest) => {
     setDriveRequest(data)
-    router.push('/drive-request')
+    setIsRequesting(false)
   }, [])
+
+  const handleDriveRequestUpdated = useCallback(
+    (data: Partial<DriveRequest>) => {
+      if (!driveRequest) return
+      setDriveRequest({ ...driveRequest, ...data })
+    },
+    [driveRequest]
+  )
 
   const handleDriveRequestRejected = useCallback(() => {
     Toast.show({
@@ -72,6 +85,8 @@ export default function DriveRequestContextProvider({ children }: Props) {
       text1: 'ขออภัย',
       text2: 'คำขอถูกปฏิเสธเนื่องจากไม่มีวินให้บริการในขณะนี้'
     })
+    setDriveRequest(null)
+    setIsRequesting(false)
   }, [])
 
   const handleException = useCallback((error: any) => {
@@ -80,28 +95,34 @@ export default function DriveRequestContextProvider({ children }: Props) {
       text1: 'เกิดข้อผิดพลาด',
       text2: error?.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
     })
+    setDriveRequest(null)
   }, [])
 
   // Handle socket io events on mount with cleanup
   useEffect(() => {
     driveRequestSocket.on('drive-request-created', handleDriveRequestCreated)
+    driveRequestSocket.on('drive-request-updated', handleDriveRequestUpdated)
     driveRequestSocket.on('drive-request-rejected', handleDriveRequestRejected)
     driveRequestSocket.on('exception', handleException)
 
     return () => {
       driveRequestSocket.off('drive-request-created', handleDriveRequestCreated)
+      driveRequestSocket.off('drive-request-updated', handleDriveRequestUpdated)
       driveRequestSocket.off(
         'drive-request-rejected',
         handleDriveRequestRejected
       )
       driveRequestSocket.off('exception', handleException)
     }
-  }, [handleDriveRequestCreated, handleDriveRequestRejected, handleException])
+  }, [
+    handleDriveRequestCreated,
+    handleDriveRequestUpdated,
+    handleDriveRequestRejected,
+    handleException
+  ])
 
   // Handle socket io connection on mount with cleanup
   useEffect(() => {
-    driveRequestSocket.connect()
-
     return () => {
       driveRequestSocket.disconnect()
     }
@@ -110,6 +131,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   return (
     <DriveRequestContext.Provider
       value={{
+        isRequesting,
         location,
         route,
         origin,
