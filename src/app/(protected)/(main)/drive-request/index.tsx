@@ -3,7 +3,7 @@ import { Colors, Image, Text, View } from 'react-native-ui-lib'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { Redirect, router } from 'expo-router'
 import Waypoint from '@/components/Waypoint'
-import { DriveRequestStatus } from '@/sockets/drive-request/type'
+import { DriveRequestSessionStatus } from '@/sockets/drive-request/type'
 import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { driveRequestSocket } from '@/sockets/drive-request'
@@ -53,11 +53,11 @@ export default function DriveRequestScreen() {
     <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
       <View>
         <Text h4B>
-          {driveRequest.status === DriveRequestStatus.ON_GOING &&
+          {driveRequest.status === DriveRequestSessionStatus.ON_GOING &&
             'คนขับกำลังมารับคุณ'}
-          {driveRequest.status === DriveRequestStatus.ARRIVED &&
+          {driveRequest.status === DriveRequestSessionStatus.ARRIVED &&
             'คนขับถึงจุดรับแล้ว'}
-          {driveRequest.status === DriveRequestStatus.PICKED_UP &&
+          {driveRequest.status === DriveRequestSessionStatus.PICKED_UP &&
             'คุณกำลังเดินทางไปยังที่หมาย'}
         </Text>
       </View>

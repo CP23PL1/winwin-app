@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
 import { FontAwesome5 } from '@expo/vector-icons'
-import { MaskedPlaceDetail } from '@/apis/google/type'
 import { TextStyle, ViewStyle } from 'react-native'
+import { Waypoint as DriveRequestWaypoint } from '@/apis/drive-requests/types'
 
 type Props = {
-  placeDetail: MaskedPlaceDetail
+  placeDetail: DriveRequestWaypoint
   color: string
   styles?: {
     row?: ViewStyle

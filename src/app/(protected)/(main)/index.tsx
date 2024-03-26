@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Card, Text, View } from 'react-native-ui-lib'
+import { Button, Text, View } from 'react-native-ui-lib'
 import { commonUtil } from '@/utils/common'
 import { serviceSpotUtil } from '@/utils/service-spot'
 import { SERVICE_CHARGE } from '@/constants/service-spots'
@@ -12,12 +12,10 @@ export default function MainScreen() {
   const {
     location,
     route,
-    price,
     origin,
     setOrigin,
     destination,
     setDestination,
-    driveRequest,
     requestDrive
   } = useDriveRequestContext()
 
@@ -30,13 +28,6 @@ export default function MainScreen() {
         onOriginChange={setOrigin}
         onDestinationChange={setDestination}
       />
-      {driveRequest && (
-        <View absB absL center padding-20>
-          <Card>
-            <Text>HELLO</Text>
-          </Card>
-        </View>
-      )}
     </SafeAreaView>
   ) : (
     <View
@@ -56,15 +47,15 @@ export default function MainScreen() {
         <View>
           <View row spread centerV>
             <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-            <Text body>{commonUtil.formatCurrency(price)}</Text>
+            <Text body>{commonUtil.formatCurrency(route.priceByDistance)}</Text>
           </View>
           <View row spread centerV>
             <Text caption>ค่าเรียก</Text>
-            <Text body>{commonUtil.formatCurrency(SERVICE_CHARGE)}</Text>
+            <Text body>{commonUtil.formatCurrency(route.serviceCharge)}</Text>
           </View>
           <View row spread centerV>
             <Text caption>ทั้งหมด</Text>
-            <Text h5B>{commonUtil.formatCurrency(price + SERVICE_CHARGE)}</Text>
+            <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
           </View>
         </View>
       </View>

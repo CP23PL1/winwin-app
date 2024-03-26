@@ -6,18 +6,20 @@ import {
   useMemo,
   useState
 } from 'react'
-import { MaskedPlaceDetail, Route } from '@/apis/google/type'
-import { serviceSpotUtil } from '@/utils/service-spot'
 import { useLocation } from '@/hooks/useLocation'
 import { GeoPosition } from 'react-native-geolocation-service'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
 import {
   DriveRequest,
-  DriveRequestStatus,
+  DriveRequestSessionStatus,
   RequestDrive
 } from '@/sockets/drive-request/type'
 import { driveRequestSocket } from '@/sockets/drive-request'
+import {
+  DriveRequestPreviewResponse,
+  Waypoint
+} from '@/apis/drive-requests/types'
 
 type Props = {
   children: React.ReactNode
@@ -25,15 +27,14 @@ type Props = {
 
 type DriveRequestContextT = {
   location: GeoPosition | null
-  route: Route | null
-  origin: MaskedPlaceDetail | null
-  destination: MaskedPlaceDetail | null
-  price: number
+  route: DriveRequestPreviewResponse | null
+  origin: Waypoint | null
+  destination: Waypoint | null
   driveRequest: DriveRequest | null
   isRequesting: boolean
-  setOrigin: (origin: MaskedPlaceDetail) => void
-  setDestination: (destination: MaskedPlaceDetail) => void
-  setRoute: (route: Route) => void
+  setOrigin: (origin: Waypoint) => void
+  setDestination: (destination: Waypoint) => void
+  setRoute: (route: DriveRequestPreviewResponse) => void
   requestDrive: () => void
 }
 
@@ -43,26 +44,18 @@ const DriveRequestContext = createContext<DriveRequestContextT>(
 
 export default function DriveRequestContextProvider({ children }: Props) {
   const { location } = useLocation()
-  const [route, setRoute] = useState<Route | null>(null)
-  const [origin, setOrigin] = useState<MaskedPlaceDetail | null>(null)
-  const [destination, setDestination] = useState<MaskedPlaceDetail | null>(null)
+  const [route, setRoute] = useState<DriveRequestPreviewResponse | null>(null)
+  const [origin, setOrigin] = useState<Waypoint | null>(null)
+  const [destination, setDestination] = useState<Waypoint | null>(null)
   const [driveRequest, setDriveRequest] = useState<DriveRequest | null>(null)
   const [isRequesting, setIsRequesting] = useState(false)
-
-  const price = useMemo(
-    () =>
-      route?.distanceMeters
-        ? serviceSpotUtil.calculatePrice(route.distanceMeters / 1000)
-        : 0,
-    [route?.distanceMeters]
-  )
 
   const requestDrive = useCallback(() => {
     if (!origin || !destination || !route) return
     driveRequestSocket.connect()
     const payload: RequestDrive = {
-      origin,
-      destination,
+      origin: origin.location,
+      destination: destination.location,
       route
     }
     driveRequestSocket.emit('request-drive', payload)
@@ -78,7 +71,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const handleDriveRequestUpdated = useCallback(
     (data: Partial<DriveRequest>) => {
       if (!driveRequest) return
-      if (driveRequest.status === DriveRequestStatus.COMPLETED) {
+      if (data.status === DriveRequestSessionStatus.COMPLETED) {
         router.replace('/')
       }
       setDriveRequest({ ...driveRequest, ...data })
@@ -143,7 +136,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
         route,
         origin,
         destination,
-        price,
         driveRequest,
         setOrigin,
         setDestination,

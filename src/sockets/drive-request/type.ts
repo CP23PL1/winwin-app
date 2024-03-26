@@ -1,13 +1,8 @@
-import { MaskedPlaceDetail, Route } from '@/apis/google/type'
+import { DriveRequestPreviewResponse } from '@/apis/drive-requests/types'
 import { Coordinate } from '@/apis/shared/type'
 import { User } from '@/apis/users/type'
 
-export type CreateDriveRequest = {
-  origin: Coordinate
-  destination: Coordinate
-}
-
-export enum DriveRequestStatus {
+export enum DriveRequestSessionStatus {
   PENDING = 'pending',
   ON_GOING = 'on_going',
   ARRIVED = 'arrived',
@@ -17,15 +12,15 @@ export enum DriveRequestStatus {
 }
 
 export type RequestDrive = {
-  origin: MaskedPlaceDetail
-  destination: MaskedPlaceDetail
-  route: Route
+  origin: Coordinate
+  destination: Coordinate
+  route: DriveRequestPreviewResponse
 }
 
 export type DriveRequest = {
   sid?: string
-  user_id?: string
-  driver_id?: string
+  userId?: string
+  driverId?: string
   user: User
   driver: Driver
   origin?: Coordinate
@@ -37,7 +32,8 @@ export type DriveRequest = {
       encodedPolyline: string
     }
   }
-  status?: DriveRequestStatus
+  paidAmount: number
+  status?: DriveRequestSessionStatus
   refCode?: string
   createdAt?: string
 }

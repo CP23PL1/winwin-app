@@ -18,8 +18,8 @@ import debounce from 'lodash.debounce'
 import ServiceSpotCallout from '@/components/service-spots/ServiceSpotCallout'
 import { isAxiosError } from 'axios'
 import { mapUtil } from '@/utils/map'
-import { googleApi } from '@/apis/google'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
+import { driveRequestsApi } from '@/apis/drive-requests'
 
 export default function MainLayout() {
   const { location, route, origin, setOrigin, destination, setRoute } =
@@ -35,8 +35,8 @@ export default function MainLayout() {
     queryKey: ['service-spots'],
     queryFn: () =>
       serviceSpotsApi.getNearbyServiceSpots({
-        lat: destination?.geometry.location.lat ?? location?.coords.latitude,
-        lng: destination?.geometry.location.lng ?? location?.coords.longitude,
+        lat: destination?.location.lat ?? location?.coords.latitude,
+        lng: destination?.location.lng ?? location?.coords.longitude,
         radius: NEARBY_RADIUS
       }),
     enabled: destination !== null || location !== null
@@ -55,28 +55,17 @@ export default function MainLayout() {
   )
 
   const fetchRoutes = useCallback(async () => {
-    if (!origin || !destination?.place_id) return
+    if (!origin || !destination) return
 
     try {
-      const data = await googleApi.getRoutes({
-        origin: {
-          placeId: origin.place_id
-        },
-        destination: {
-          placeId: destination.place_id
-        },
-        travelMode: 'TWO_WHEELER',
-        languageCode: 'th-TH',
-        units: 'METRIC'
-      })
-      const decodedPolyline = mapUtil.decodePolyline(
-        data.routes[0].polyline.encodedPolyline
+      const data = await driveRequestsApi.previewRoute(
+        origin.location,
+        destination.location
       )
-      setRoute({
-        duration: data.routes[0].duration,
-        distanceMeters: data.routes[0].distanceMeters,
-        polyline: data.routes[0].polyline
-      })
+      const decodedPolyline = mapUtil.decodePolyline(
+        data.polyline.encodedPolyline
+      )
+      setRoute(data)
       setPoints(decodedPolyline)
       map.current?.fitToCoordinates(decodedPolyline, {
         edgePadding: {
@@ -105,12 +94,12 @@ export default function MainLayout() {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01
     })
-    googleApi.reverseGeocode(location.coords).then((detail) => {
-      setOrigin({
-        name: 'ตำแหน่งปัจจุบัน',
-        geometry: detail.geometry,
-        place_id: detail.place_id
-      })
+    setOrigin({
+      name: 'ตำแหน่งปัจจุบัน',
+      location: {
+        lat: location.coords.latitude,
+        lng: location.coords.longitude
+      }
     })
   }, [location])
 
@@ -130,8 +119,8 @@ export default function MainLayout() {
         {destination && (
           <Marker
             coordinate={{
-              latitude: destination.geometry.location.lat,
-              longitude: destination.geometry.location.lng
+              latitude: destination.location.lat,
+              longitude: destination.location.lng
             }}
             image={require('../../../../assets/map_marker_red.png')}
           />
@@ -146,8 +135,8 @@ export default function MainLayout() {
         {route && origin && (
           <Marker
             coordinate={{
-              latitude: origin.geometry.location.lat,
-              longitude: origin.geometry.location.lng
+              latitude: origin.location.lat,
+              longitude: origin.location.lng
             }}
             image={require('../../../../assets/map_marker_blue.png')}
           />

@@ -6,13 +6,14 @@ import { StyleSheet } from 'react-native'
 import PlaceAutocompleteModal from './PlaceAutocompleteModal'
 import { GeoPosition } from 'react-native-geolocation-service'
 import { MaskedPlaceDetail } from '@/apis/google/type'
+import { Waypoint } from '@/apis/drive-requests/types'
 
 type Props = {
   currentLocation?: GeoPosition | null
-  origin: MaskedPlaceDetail | null
-  destination: MaskedPlaceDetail | null
-  onOriginChange: (origin: MaskedPlaceDetail) => void
-  onDestinationChange: (destination: MaskedPlaceDetail) => void
+  origin: Waypoint | null
+  destination: Waypoint | null
+  onOriginChange: (origin: Waypoint) => void
+  onDestinationChange: (destination: Waypoint) => void
 }
 
 export default function RouteCard({
@@ -43,9 +44,15 @@ export default function RouteCard({
       setOpenPlaceAutocompleteModal(false)
       if (!detail) return
       if (currentWaypoint === 'origin') {
-        onOriginChange(detail)
+        onOriginChange({
+          name: data.description,
+          location: detail.geometry.location
+        })
       } else {
-        onDestinationChange(detail)
+        onDestinationChange({
+          name: data.description,
+          location: detail.geometry.location
+        })
       }
     },
     [currentWaypoint, onOriginChange, onDestinationChange]
