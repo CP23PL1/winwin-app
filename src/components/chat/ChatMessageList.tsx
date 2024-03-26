@@ -18,10 +18,3 @@ export default function ChatMessageList({ user, messages }: Props) {
     />
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 15
-  }
-})

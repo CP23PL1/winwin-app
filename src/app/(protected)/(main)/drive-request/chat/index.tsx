@@ -14,13 +14,14 @@ export default function DriveRequestChat() {
   const [messages, setChatMessages] = useState<ChatMessage[]>([])
 
   const sendChatMessage = (message: string) => {
-    if (!driveRequest?.id) {
+    if (!driveRequest?.sid) {
       console.log('No drive request id')
       return
     }
     if (!message) return
     const payload: ChatMessagePayload = {
-      to: driveRequest.driver.id,
+      driveRequestSid: driveRequest.sid,
+      to: driveRequest.driver_id,
       message
     }
     driveRequestSocket.emit('chat-message', payload)
@@ -46,6 +47,15 @@ export default function DriveRequestChat() {
       driveRequestSocket.off('chat-message-received', handleChatMessageReceived)
     }
   }, [handleChatMessageReceived])
+
+  useEffect(() => {
+    if (!driveRequest) return
+    driveRequestSocket
+      .emitWithAck('get-chat-messages', driveRequest.sid)
+      .then((data) => {
+        setChatMessages(data)
+      })
+  }, [driveRequest, setChatMessages])
 
   if (!driveRequest) {
     return <Redirect href="/" />

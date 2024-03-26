@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Text, View } from 'react-native-ui-lib'
+import { Button, Card, Text, View } from 'react-native-ui-lib'
 import { commonUtil } from '@/utils/common'
 import { serviceSpotUtil } from '@/utils/service-spot'
 import { SERVICE_CHARGE } from '@/constants/service-spots'
@@ -17,11 +17,12 @@ export default function MainScreen() {
     setOrigin,
     destination,
     setDestination,
+    driveRequest,
     requestDrive
   } = useDriveRequestContext()
 
   return !route ? (
-    <SafeAreaView style={{ marginTop: 10, alignItems: 'center' }}>
+    <SafeAreaView style={{ flex: 1, marginTop: 10, alignItems: 'center' }}>
       <RouteCard
         currentLocation={location}
         origin={origin}
@@ -29,6 +30,13 @@ export default function MainScreen() {
         onOriginChange={setOrigin}
         onDestinationChange={setDestination}
       />
+      {driveRequest && (
+        <View absB absL center padding-20>
+          <Card>
+            <Text>HELLO</Text>
+          </Card>
+        </View>
+      )}
     </SafeAreaView>
   ) : (
     <View

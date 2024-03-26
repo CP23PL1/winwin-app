@@ -9,11 +9,11 @@ export type CreateDriveRequest = {
 
 export enum DriveRequestStatus {
   PENDING = 'pending',
-  ACCEPTED = 'accepted',
+  ON_GOING = 'on_going',
+  ARRIVED = 'arrived',
   PICKED_UP = 'picked_up',
-  REJECTED = 'rejected',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed'
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
 }
 
 export type RequestDrive = {
@@ -23,14 +23,21 @@ export type RequestDrive = {
 }
 
 export type DriveRequest = {
-  id?: number
+  sid?: string
+  user_id?: string
+  driver_id?: string
   user: User
-  driver?: any
-  origin: Coordinate
-  destination: Coordinate
+  driver: Driver
+  origin?: Coordinate
+  destination?: Coordinate
+  route?: {
+    duration: string
+    distanceMeters: number
+    polyline: {
+      encodedPolyline: string
+    }
+  }
   status?: DriveRequestStatus
   refCode?: string
   createdAt?: string
-  updatedAt?: string
-  route: Route
 }

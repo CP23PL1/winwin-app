@@ -1,14 +1,37 @@
 import { ActivityIndicator, StyleSheet } from 'react-native'
 import { Colors, Image, Text, View } from 'react-native-ui-lib'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
-import { Redirect, Stack, router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
 import Waypoint from '@/components/Waypoint'
 import { DriveRequestStatus } from '@/sockets/drive-request/type'
 import { Ionicons } from '@expo/vector-icons'
+import { useCallback, useEffect, useState } from 'react'
+import { driveRequestSocket } from '@/sockets/drive-request'
 
 export default function DriveRequestScreen() {
   const { isRequesting, origin, destination, driveRequest } =
     useDriveRequestContext()
+
+  const [newMessageReceived, setNewMessageReceived] = useState(false)
+
+  const handleChatMessageReceived = () => {
+    setNewMessageReceived(true)
+  }
+
+  const handleChatBubblePressed = useCallback(() => {
+    if (newMessageReceived) {
+      setNewMessageReceived(false)
+    }
+    router.push('/drive-request/chat')
+  }, [newMessageReceived])
+
+  useEffect(() => {
+    driveRequestSocket.on('chat-message-received', handleChatMessageReceived)
+
+    return () => {
+      driveRequestSocket.off('chat-message-received', handleChatMessageReceived)
+    }
+  }, [])
 
   if (isRequesting) {
     return (
@@ -29,13 +52,14 @@ export default function DriveRequestScreen() {
   return (
     <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
       <View>
-        {driveRequest.status === DriveRequestStatus.ACCEPTED ? (
-          <Text h4B>คนขับกำลังมารับคุณ</Text>
-        ) : driveRequest.status === DriveRequestStatus.PICKED_UP ? (
-          <Text h4B>คุณกำลังเดินทางไปยังที่หมาย</Text>
-        ) : (
-          <></>
-        )}
+        <Text h4B>
+          {driveRequest.status === DriveRequestStatus.ON_GOING &&
+            'คนขับกำลังมารับคุณ'}
+          {driveRequest.status === DriveRequestStatus.ARRIVED &&
+            'คนขับถึงจุดรับแล้ว'}
+          {driveRequest.status === DriveRequestStatus.PICKED_UP &&
+            'คุณกำลังเดินทางไปยังที่หมาย'}
+        </Text>
       </View>
       <View gap-10>
         <Waypoint
@@ -75,11 +99,26 @@ export default function DriveRequestScreen() {
             <Text caption>วินหลายเลข {driveRequest.driver.info.no}</Text>
           </View>
         </View>
-        <Ionicons
-          name="chatbubble-ellipses-outline"
-          size={32}
-          onPress={() => router.push('/drive-request/chat')}
-        />
+        <View>
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={32}
+            onPress={handleChatBubblePressed}
+          />
+          {newMessageReceived && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                backgroundColor: 'red',
+                width: 10,
+                height: 10,
+                borderRadius: 5
+              }}
+            />
+          )}
+        </View>
       </View>
     </View>
   )

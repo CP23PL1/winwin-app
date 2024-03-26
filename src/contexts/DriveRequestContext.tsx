@@ -12,7 +12,11 @@ import { useLocation } from '@/hooks/useLocation'
 import { GeoPosition } from 'react-native-geolocation-service'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
-import { DriveRequest, RequestDrive } from '@/sockets/drive-request/type'
+import {
+  DriveRequest,
+  DriveRequestStatus,
+  RequestDrive
+} from '@/sockets/drive-request/type'
 import { driveRequestSocket } from '@/sockets/drive-request'
 
 type Props = {
@@ -74,6 +78,9 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const handleDriveRequestUpdated = useCallback(
     (data: Partial<DriveRequest>) => {
       if (!driveRequest) return
+      if (driveRequest.status === DriveRequestStatus.COMPLETED) {
+        router.replace('/')
+      }
       setDriveRequest({ ...driveRequest, ...data })
     },
     [driveRequest]
