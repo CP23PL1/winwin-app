@@ -10,7 +10,8 @@
       "env": {
         "APP_NAME": "WinWin (Dev)",
         "EXPO_PUBLIC_API_URL": "https://capstone23.sit.kmutt.ac.th/pl1/v1",
-        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th/pl1",
+        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th",
+        "EXPO_PUBLIC_SOCKET_PATH": "/pl1-socket",
         "EXPO_PUBLIC_AUTH0_DOMAIN": "cp23pl1-kmutt.jp.auth0.com",
         "EXPO_PUBLIC_AUTH0_CLIENT_ID": "FK8i1AmlZopP4ZWuZVD66pa7keL1xRF6",
         "EXPO_PUBLIC_AUTH0_AUDIENCE": "https://cp23pl1.sit.kmutt.ac.th/",
@@ -22,7 +23,8 @@
       "env": {
         "APP_NAME": "WinWin (Preview)",
         "EXPO_PUBLIC_API_URL": "https://capstone23.sit.kmutt.ac.th/pl1/v1",
-        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th/pl1",
+        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th",
+        "EXPO_PUBLIC_SOCKET_PATH": "/pl1-socket",
         "EXPO_PUBLIC_AUTH0_DOMAIN": "cp23pl1-kmutt.jp.auth0.com",
         "EXPO_PUBLIC_AUTH0_CLIENT_ID": "FK8i1AmlZopP4ZWuZVD66pa7keL1xRF6",
         "EXPO_PUBLIC_AUTH0_AUDIENCE": "https://cp23pl1.sit.kmutt.ac.th/",
@@ -36,7 +38,8 @@
       "env": {
         "APP_NAME": "WinWin",
         "EXPO_PUBLIC_API_URL": "https://capstone23.sit.kmutt.ac.th/pl1/v1",
-        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th/pl1",
+        "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th",
+        "EXPO_PUBLIC_SOCKET_PATH": "/pl1-socket",
         "EXPO_PUBLIC_AUTH0_DOMAIN": "cp23pl1-kmutt.jp.auth0.com",
         "EXPO_PUBLIC_AUTH0_CLIENT_ID": "FK8i1AmlZopP4ZWuZVD66pa7keL1xRF6",
         "EXPO_PUBLIC_AUTH0_AUDIENCE": "https://cp23pl1.sit.kmutt.ac.th/",
