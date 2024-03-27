@@ -3,18 +3,13 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState
 } from 'react'
 import { useLocation } from '@/hooks/useLocation'
 import { GeoPosition } from 'react-native-geolocation-service'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
-import {
-  DriveRequest,
-  DriveRequestSessionStatus,
-  RequestDrive
-} from '@/sockets/drive-request/type'
+import { DriveRequest, RequestDrive } from '@/sockets/drive-request/type'
 import { driveRequestSocket } from '@/sockets/drive-request'
 import {
   DriveRequestPreviewResponse,
@@ -63,6 +58,14 @@ export default function DriveRequestContextProvider({ children }: Props) {
     setIsRequesting(true)
   }, [driveRequestSocket, origin, destination, route])
 
+  const reset = useCallback(() => {
+    setDriveRequest(null)
+    setIsRequesting(false)
+    setRoute(null)
+    setOrigin(null)
+    setDestination(null)
+  }, [])
+
   const handleDriveRequestCreated = useCallback((data: DriveRequest) => {
     setDriveRequest(data)
     setIsRequesting(false)
@@ -71,9 +74,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const handleDriveRequestUpdated = useCallback(
     (data: Partial<DriveRequest>) => {
       if (!driveRequest) return
-      if (data.status === DriveRequestSessionStatus.COMPLETED) {
-        router.replace('/')
-      }
       setDriveRequest({ ...driveRequest, ...data })
     },
     [driveRequest]
@@ -89,20 +89,38 @@ export default function DriveRequestContextProvider({ children }: Props) {
     setIsRequesting(false)
   }, [])
 
-  const handleException = useCallback((error: any) => {
+  const handleDriveRequestCompleted = useCallback(() => {
     Toast.show({
-      type: 'error',
-      text1: 'เกิดข้อผิดพลาด',
-      text2: error?.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+      type: 'success',
+      text1: 'เดินทางสำเร็จ',
+      text2: 'ขอบคุณที่ใช้บริการของเรา',
+      visibilityTime: 6000
     })
-    setDriveRequest(null)
-  }, [])
+    router.replace('/')
+    reset()
+  }, [reset])
+
+  const handleException = useCallback(
+    (error: any) => {
+      Toast.show({
+        type: 'error',
+        text1: 'เกิดข้อผิดพลาด',
+        text2: error?.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+      })
+      reset()
+    },
+    [reset]
+  )
 
   // Handle socket io events on mount with cleanup
   useEffect(() => {
     driveRequestSocket.on('drive-request-created', handleDriveRequestCreated)
     driveRequestSocket.on('drive-request-updated', handleDriveRequestUpdated)
     driveRequestSocket.on('drive-request-rejected', handleDriveRequestRejected)
+    driveRequestSocket.on(
+      'drive-request-completed',
+      handleDriveRequestCompleted
+    )
     driveRequestSocket.on('exception', handleException)
 
     return () => {
@@ -112,12 +130,17 @@ export default function DriveRequestContextProvider({ children }: Props) {
         'drive-request-rejected',
         handleDriveRequestRejected
       )
+      driveRequestSocket.off(
+        'drive-request-completed',
+        handleDriveRequestCompleted
+      )
       driveRequestSocket.off('exception', handleException)
     }
   }, [
     handleDriveRequestCreated,
     handleDriveRequestUpdated,
     handleDriveRequestRejected,
+    handleDriveRequestCompleted,
     handleException
   ])
 

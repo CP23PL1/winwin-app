@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, Text, View } from 'react-native-ui-lib'
 import { commonUtil } from '@/utils/common'
 import { serviceSpotUtil } from '@/utils/service-spot'
-import { SERVICE_CHARGE } from '@/constants/service-spots'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import RouteCard from '@/components/RouteCard'
 
@@ -19,8 +18,15 @@ export default function MainScreen() {
     requestDrive
   } = useDriveRequestContext()
 
-  return !route ? (
-    <SafeAreaView style={{ flex: 1, marginTop: 10, alignItems: 'center' }}>
+  return (
+    <SafeAreaView
+      style={{
+        flex: 1,
+        marginTop: 10,
+        alignItems: 'center',
+        pointerEvents: 'box-none'
+      }}
+    >
       <RouteCard
         currentLocation={location}
         origin={origin}
@@ -28,40 +34,49 @@ export default function MainScreen() {
         onOriginChange={setOrigin}
         onDestinationChange={setDestination}
       />
-    </SafeAreaView>
-  ) : (
-    <View
-      absB
-      absL
-      bg-white
-      padding-15
-      gap-15
-      width="100%"
-      style={styles.footer}
-    >
-      <View padding-5 gap-10>
-        <Text h3B>
-          {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที (
-          {serviceSpotUtil.getDistanceText(route.distanceMeters)})
-        </Text>
-        <View>
-          <View row spread centerV>
-            <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-            <Text body>{commonUtil.formatCurrency(route.priceByDistance)}</Text>
+      {route && (
+        <View
+          absB
+          absL
+          bg-white
+          padding-15
+          gap-15
+          width="100%"
+          style={styles.footer}
+        >
+          <View padding-5 gap-10>
+            <Text h3B>
+              {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที (
+              {serviceSpotUtil.getDistanceText(route.distanceMeters)})
+            </Text>
+            <View>
+              <View row spread centerV>
+                <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
+                <Text body>
+                  {commonUtil.formatCurrency(route.priceByDistance)}
+                </Text>
+              </View>
+              <View row spread centerV>
+                <Text caption>ค่าเรียก</Text>
+                <Text body>
+                  {commonUtil.formatCurrency(route.serviceCharge)}
+                </Text>
+              </View>
+              <View row spread centerV>
+                <Text caption>ทั้งหมด</Text>
+                <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
+              </View>
+            </View>
           </View>
-          <View row spread centerV>
-            <Text caption>ค่าเรียก</Text>
-            <Text body>{commonUtil.formatCurrency(route.serviceCharge)}</Text>
-          </View>
-          <View row spread centerV>
-            <Text caption>ทั้งหมด</Text>
-            <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
-          </View>
-        </View>
-      </View>
 
-      <Button label="เรียกรับบริการ" disabled={!route} onPress={requestDrive} />
-    </View>
+          <Button
+            label="เรียกรับบริการ"
+            disabled={!route}
+            onPress={requestDrive}
+          />
+        </View>
+      )}
+    </SafeAreaView>
   )
 }
 

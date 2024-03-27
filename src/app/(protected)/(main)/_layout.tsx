@@ -10,7 +10,7 @@ import MapView, {
 } from 'react-native-maps'
 import { LoaderScreen, View } from 'react-native-ui-lib'
 import { StyleSheet } from 'react-native'
-import { Slot, router } from 'expo-router'
+import { Slot, Stack, router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { NEARBY_RADIUS } from '@/constants/service-spots'
@@ -106,7 +106,7 @@ export default function MainLayout() {
   return !initialRegion ? (
     <LoaderScreen />
   ) : (
-    <View height="100%">
+    <View flex>
       <MapView
         ref={map}
         style={StyleSheet.absoluteFill}
