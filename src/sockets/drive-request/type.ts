@@ -1,4 +1,7 @@
-import { DriveRequestPreviewResponse } from '@/apis/drive-requests/types'
+import {
+  DriveRequestPreviewResponse,
+  Waypoint
+} from '@/apis/drive-requests/types'
 import { Coordinate } from '@/apis/shared/type'
 import { User } from '@/apis/users/type'
 
@@ -23,8 +26,8 @@ export type DriveRequest = {
   driverId?: string
   user: User
   driver: Driver
-  origin?: Coordinate
-  destination?: Coordinate
+  origin?: Waypoint
+  destination?: Waypoint
   route?: {
     duration: string
     distanceMeters: number

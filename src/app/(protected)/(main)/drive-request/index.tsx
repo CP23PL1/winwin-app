@@ -7,10 +7,10 @@ import { DriveRequestSessionStatus } from '@/sockets/drive-request/type'
 import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { driveRequestSocket } from '@/sockets/drive-request'
+import moment from 'moment'
 
 export default function DriveRequestScreen() {
-  const { isRequesting, origin, destination, driveRequest } =
-    useDriveRequestContext()
+  const { origin, destination, driveRequest } = useDriveRequestContext()
 
   const [newMessageReceived, setNewMessageReceived] = useState(false)
 
@@ -32,18 +32,6 @@ export default function DriveRequestScreen() {
       driveRequestSocket.off('chat-message-received', handleChatMessageReceived)
     }
   }, [])
-
-  if (isRequesting) {
-    return (
-      <View absB absL bg-white padding-25 gap-20 style={styles.footer}>
-        <ActivityIndicator
-          size="large"
-          color={Colors.$backgroundPrimaryHeavy}
-        />
-        <Text center>โปรดรอสักครู่ เรากำลังหาคนขับให้คุณ...</Text>
-      </View>
-    )
-  }
 
   if (!driveRequest) {
     return <Redirect href="/" />
@@ -80,7 +68,9 @@ export default function DriveRequestScreen() {
         </View>
         <View row centerV spread>
           <Text bodyB>วันที่</Text>
-          <Text caption>{driveRequest?.createdAt}</Text>
+          <Text caption>
+            {moment(driveRequest?.createdAt).format('DD/MM/YYYY HH:mm')}
+          </Text>
         </View>
       </View>
 

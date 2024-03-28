@@ -1,7 +1,7 @@
 import React from 'react'
-import { StyleSheet } from 'react-native'
+import { ActivityIndicator, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Text, View } from 'react-native-ui-lib'
+import { Button, Colors, Text, View } from 'react-native-ui-lib'
 import { commonUtil } from '@/utils/common'
 import { serviceSpotUtil } from '@/utils/service-spot'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
@@ -9,6 +9,7 @@ import RouteCard from '@/components/RouteCard'
 
 export default function MainScreen() {
   const {
+    isRequesting,
     location,
     route,
     origin,
@@ -44,36 +45,48 @@ export default function MainScreen() {
           width="100%"
           style={styles.footer}
         >
-          <View padding-5 gap-10>
-            <Text h3B>
-              {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที (
-              {serviceSpotUtil.getDistanceText(route.distanceMeters)})
-            </Text>
-            <View>
-              <View row spread centerV>
-                <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-                <Text body>
-                  {commonUtil.formatCurrency(route.priceByDistance)}
+          {!isRequesting ? (
+            <>
+              <View padding-5 gap-10>
+                <Text h3B>
+                  {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที
+                  ({serviceSpotUtil.getDistanceText(route.distanceMeters)})
                 </Text>
+                <View>
+                  <View row spread centerV>
+                    <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
+                    <Text body>
+                      {commonUtil.formatCurrency(route.priceByDistance)}
+                    </Text>
+                  </View>
+                  <View row spread centerV>
+                    <Text caption>ค่าเรียก</Text>
+                    <Text body>
+                      {commonUtil.formatCurrency(route.serviceCharge)}
+                    </Text>
+                  </View>
+                  <View row spread centerV>
+                    <Text caption>ทั้งหมด</Text>
+                    <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
+                  </View>
+                </View>
               </View>
-              <View row spread centerV>
-                <Text caption>ค่าเรียก</Text>
-                <Text body>
-                  {commonUtil.formatCurrency(route.serviceCharge)}
-                </Text>
-              </View>
-              <View row spread centerV>
-                <Text caption>ทั้งหมด</Text>
-                <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
-              </View>
-            </View>
-          </View>
 
-          <Button
-            label="เรียกรับบริการ"
-            disabled={!route}
-            onPress={requestDrive}
-          />
+              <Button
+                label="เรียกรับบริการ"
+                disabled={!route}
+                onPress={requestDrive}
+              />
+            </>
+          ) : (
+            <>
+              <ActivityIndicator
+                size="large"
+                color={Colors.$backgroundPrimaryHeavy}
+              />
+              <Text center>โปรดรอสักครู่ เรากำลังหาคนขับให้คุณ...</Text>
+            </>
+          )}
         </View>
       )}
     </SafeAreaView>
