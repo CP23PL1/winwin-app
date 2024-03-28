@@ -20,25 +20,16 @@ export default function ServiceSpotCallout({ serviceSpot }: Props) {
         <Text caption>
           {serviceSpotUtil.getDistanceText(serviceSpot.distance!)}
         </Text>
-        <View row spread centerV marginT-5 gap-12>
-          <View row centerV gap-5>
-            <View center>
-              <AntDesign name="star" size={16} color={Colors.yellow40} />
-            </View>
-            <Text caption color="gray">
-              5.0
-            </Text>
-          </View>
-          <View row centerV>
-            <Text caption color={Colors.$iconPrimary}>
-              ดูรายละเอียด
-            </Text>
-            <Entypo
-              name="chevron-thin-right"
-              size={12}
-              color={Colors.$iconPrimary}
-            />
-          </View>
+
+        <View row centerV right>
+          <Text caption color={Colors.$iconPrimary}>
+            ดูรายละเอียด
+          </Text>
+          <Entypo
+            name="chevron-thin-right"
+            size={12}
+            color={Colors.$iconPrimary}
+          />
         </View>
       </View>
     </View>
