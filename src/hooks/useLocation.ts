@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { PermissionsAndroid, Platform } from 'react-native'
 import Geolocation from 'react-native-geolocation-service'
 
 export function useLocation() {
@@ -12,6 +12,12 @@ export function useLocation() {
       if (status !== 'granted') {
         throw new Error('Permission to access location was denied')
       }
+    }
+    const status = await PermissionsAndroid.request(
+      'android.permission.ACCESS_FINE_LOCATION'
+    )
+    if (status === 'denied') {
+      throw new Error('Permission to access location was denied')
     }
     console.log('Permission granted')
     console.log('Getting current location')
