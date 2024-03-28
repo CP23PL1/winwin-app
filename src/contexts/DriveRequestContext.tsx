@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState
 } from 'react'
 import { useLocation } from '@/hooks/useLocation'
@@ -15,6 +16,8 @@ import {
   DriveRequestPreviewResponse,
   Waypoint
 } from '@/apis/drive-requests/types'
+import { LatLng } from 'react-native-maps'
+import { mapUtil } from '@/utils/map'
 
 type Props = {
   children: React.ReactNode
@@ -22,6 +25,7 @@ type Props = {
 
 type DriveRequestContextT = {
   location: GeoPosition | null
+  points: LatLng[]
   route: DriveRequestPreviewResponse | null
   origin: Waypoint | null
   destination: Waypoint | null
@@ -45,6 +49,11 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const [driveRequest, setDriveRequest] = useState<DriveRequest | null>(null)
   const [isRequesting, setIsRequesting] = useState(false)
 
+  const points = useMemo(() => {
+    if (!route) return []
+    return mapUtil.decodePolyline(route.polyline.encodedPolyline)
+  }, [route])
+
   const requestDrive = useCallback(() => {
     if (!origin || !destination || !route) return
     driveRequestSocket.connect()
@@ -54,7 +63,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
       route
     }
     driveRequestSocket.emit('request-drive', payload)
-    router.push('/drive-request')
     setIsRequesting(true)
   }, [driveRequestSocket, origin, destination, route])
 
@@ -68,7 +76,12 @@ export default function DriveRequestContextProvider({ children }: Props) {
 
   const handleDriveRequestCreated = useCallback((data: DriveRequest) => {
     setDriveRequest(data)
+    if (data.origin && data.destination) {
+      setOrigin(data.origin)
+      setDestination(data.destination)
+    }
     setIsRequesting(false)
+    router.push('/drive-request')
   }, [])
 
   const handleDriveRequestUpdated = useCallback(
@@ -107,7 +120,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
         text1: 'เกิดข้อผิดพลาด',
         text2: error?.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
       })
-      reset()
+      setIsRequesting(false)
     },
     [reset]
   )
@@ -154,6 +167,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   return (
     <DriveRequestContext.Provider
       value={{
+        points,
         isRequesting,
         location,
         route,

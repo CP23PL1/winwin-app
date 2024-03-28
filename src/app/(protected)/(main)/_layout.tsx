@@ -22,14 +22,12 @@ import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { driveRequestsApi } from '@/apis/drive-requests'
 
 export default function MainLayout() {
-  const { location, route, origin, setOrigin, destination, setRoute } =
+  const { points, location, route, origin, setOrigin, destination, setRoute } =
     useDriveRequestContext()
   const map = useRef<MapView | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
   const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
-
-  const [points, setPoints] = useState<LatLng[]>([])
 
   const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
     queryKey: ['service-spots'],
@@ -66,7 +64,6 @@ export default function MainLayout() {
         data.polyline.encodedPolyline
       )
       setRoute(data)
-      setPoints(decodedPolyline)
       map.current?.fitToCoordinates(decodedPolyline, {
         edgePadding: {
           top: 100,
@@ -115,6 +112,7 @@ export default function MainLayout() {
         provider={PROVIDER_GOOGLE}
         showsMyLocationButton={false}
         showsUserLocation={!route}
+        toolbarEnabled={false}
       >
         {destination && (
           <Marker
