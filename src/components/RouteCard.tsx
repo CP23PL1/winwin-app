@@ -69,11 +69,33 @@ export default function RouteCard({
         style={{ elevation: 2 }}
       >
         {destination && (
+          <TouchableOpacity onPress={() => handleWaypointPress('origin')}>
+            <View style={styles.row}>
+              <FontAwesome5
+                name="map-marker-alt"
+                size={20}
+                color={Colors.blue40}
+              />
+              <View
+                style={{
+                  width: 1,
+                  backgroundColor: '#6a6a6a',
+                  opacity: 0.2,
+                  height: '100%'
+                }}
+              />
+              <Text color={Colors.blue40} style={{ opacity: 0.6 }}>
+                {originName}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity onPress={() => handleWaypointPress('destination')}>
           <View style={styles.row}>
             <FontAwesome5
               name="map-marker-alt"
               size={20}
-              color={Colors.blue40}
+              color={Colors.red40}
             />
             <View
               style={{
@@ -83,29 +105,11 @@ export default function RouteCard({
                 height: '100%'
               }}
             />
-            <TouchableOpacity onPress={() => handleWaypointPress('origin')}>
-              <Text color={Colors.blue40} style={{ opacity: 0.6 }}>
-                {originName}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        <View style={styles.row}>
-          <FontAwesome5 name="map-marker-alt" size={20} color={Colors.red40} />
-          <View
-            style={{
-              width: 1,
-              backgroundColor: '#6a6a6a',
-              opacity: 0.2,
-              height: '100%'
-            }}
-          />
-          <TouchableOpacity onPress={() => handleWaypointPress('destination')}>
             <Text color={Colors.$backgroundDark} style={{ opacity: 0.5 }}>
               {destination?.name || 'คุณต้องการไปที่ไหน?'}
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </TouchableOpacity>
       </View>
       <PlaceAutocompleteModal
         location={currentLocation}

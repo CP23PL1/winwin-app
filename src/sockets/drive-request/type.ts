@@ -22,6 +22,7 @@ export type RequestDrive = {
 
 export type DriveRequest = {
   sid?: string
+  id?: string
   userId?: string
   driverId?: string
   user: User
@@ -37,6 +38,5 @@ export type DriveRequest = {
   }
   paidAmount: number
   status?: DriveRequestSessionStatus
-  refCode?: string
   createdAt?: string
 }

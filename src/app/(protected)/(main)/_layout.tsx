@@ -85,20 +85,24 @@ export default function MainLayout() {
 
   useEffect(() => {
     if (!location) return
-    setInitialRegion({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01
-    })
-    setOrigin({
-      name: 'ตำแหน่งปัจจุบัน',
-      location: {
-        lat: location.coords.latitude,
-        lng: location.coords.longitude
-      }
-    })
-  }, [location])
+    if (!initialRegion) {
+      setInitialRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01
+      })
+    }
+    if (!origin) {
+      setOrigin({
+        name: 'ตำแหน่งปัจจุบัน',
+        location: {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude
+        }
+      })
+    }
+  }, [location, initialRegion, origin])
 
   return !initialRegion ? (
     <LoaderScreen />
