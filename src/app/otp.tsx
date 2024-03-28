@@ -14,7 +14,7 @@ type Params = {
 export default function OtpScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { authorizeWithSMS } = useAuth0()
+  const { authorizeWithSMS, sendSMSCode } = useAuth0()
   const searchParams = useLocalSearchParams<Params>()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -49,6 +49,14 @@ export default function OtpScreen() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleResendOtp = async () => {
+    await sendSMSCode({
+      phoneNumber: phoneNumber!,
+      send: 'code'
+    })
+    Alert.alert('ส่งรหัสผ่านชั่วคราวใหม่เรียบร้อยแล้ว')
   }
 
   if (!phoneNumber) {
@@ -98,6 +106,14 @@ export default function OtpScreen() {
           onPress={handleAuthorizeWithSMS}
           disabled={code.length < 4 || isSubmitting}
         />
+        <View center>
+          <Text>
+            ไม่ได้รับรหัสผ่านชั่วคราว?{' '}
+            <Text underline onPress={handleResendOtp}>
+              ส่งรหัสใหม่อีกครั้ง
+            </Text>
+          </Text>
+        </View>
       </View>
     </SafeAreaView>
   )
