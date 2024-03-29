@@ -1,6 +1,6 @@
 import axiosInstance from '@/libs/axios'
 import { Coordinate } from '../shared/type'
-import { DriveRequestPreviewResponse } from './types'
+import { CreateFeedback, DriveRequestPreviewResponse } from './types'
 
 class DriveRequestsApi {
   async previewRoute(origin: Coordinate, destination: Coordinate) {
@@ -10,6 +10,16 @@ class DriveRequestsApi {
         destination
       })
       .then((res) => res.data)
+  }
+
+  async submitFeedback(data: CreateFeedback) {
+    return axiosInstance.post(
+      `/drive-requests/${data.driveRequestId}/feedback`,
+      {
+        rating: data.rating,
+        category: data.category
+      }
+    )
   }
 }
 

@@ -35,6 +35,7 @@ type DriveRequestContextT = {
   setDestination: (destination: Waypoint) => void
   setRoute: (route: DriveRequestPreviewResponse) => void
   requestDrive: () => void
+  reset: () => void
 }
 
 const DriveRequestContext = createContext<DriveRequestContextT>(
@@ -56,7 +57,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
 
   const requestDrive = useCallback(() => {
     if (!origin || !destination || !route) return
-    driveRequestSocket.connect()
     const payload: RequestDrive = {
       origin: origin.location,
       destination: destination.location,
@@ -67,22 +67,24 @@ export default function DriveRequestContextProvider({ children }: Props) {
   }, [driveRequestSocket, origin, destination, route])
 
   const reset = useCallback(() => {
+    setRoute(null)
     setDriveRequest(null)
     setIsRequesting(false)
-    setRoute(null)
     setOrigin(null)
     setDestination(null)
-  }, [])
+  }, [setDriveRequest, setIsRequesting, setRoute, setOrigin, setDestination])
 
-  const handleDriveRequestCreated = useCallback((data: DriveRequest) => {
-    setDriveRequest(data)
-    if (data.origin && data.destination) {
-      setOrigin(data.origin)
-      setDestination(data.destination)
-    }
-    setIsRequesting(false)
-    router.push('/drive-request')
-  }, [])
+  const handleDriveRequestCreated = useCallback(
+    (data: DriveRequest) => {
+      setDriveRequest(data)
+      if (data.origin && data.destination) {
+        setOrigin(data.origin)
+        setDestination(data.destination)
+      }
+      setIsRequesting(false)
+    },
+    [setOrigin, setDestination, setIsRequesting, setDriveRequest]
+  )
 
   const handleDriveRequestUpdated = useCallback(
     (data: Partial<DriveRequest>) => {
@@ -109,9 +111,8 @@ export default function DriveRequestContextProvider({ children }: Props) {
       text2: 'ขอบคุณที่ใช้บริการของเรา',
       visibilityTime: 6000
     })
-    router.replace('/')
-    reset()
-  }, [reset])
+    router.replace('/drive-request/feedback')
+  }, [])
 
   const handleException = useCallback(
     (error: any) => {
@@ -154,11 +155,14 @@ export default function DriveRequestContextProvider({ children }: Props) {
     handleDriveRequestUpdated,
     handleDriveRequestRejected,
     handleDriveRequestCompleted,
+    setDriveRequest,
     handleException
   ])
 
   // Handle socket io connection on mount with cleanup
   useEffect(() => {
+    driveRequestSocket.connect()
+
     return () => {
       driveRequestSocket.disconnect()
     }
@@ -177,7 +181,8 @@ export default function DriveRequestContextProvider({ children }: Props) {
         setOrigin,
         setDestination,
         setRoute,
-        requestDrive
+        requestDrive,
+        reset
       }}
     >
       {children}

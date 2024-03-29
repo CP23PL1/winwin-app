@@ -1,101 +1,214 @@
-import React from 'react'
-import { ActivityIndicator, StyleSheet } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Colors, Text, View } from 'react-native-ui-lib'
-import { commonUtil } from '@/utils/common'
-import { serviceSpotUtil } from '@/utils/service-spot'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import MapView, {
+  Callout,
+  Details,
+  Marker,
+  PROVIDER_GOOGLE,
+  Polyline,
+  Region
+} from 'react-native-maps'
+import { LoaderScreen, View } from 'react-native-ui-lib'
+import { StyleSheet } from 'react-native'
+import { router } from 'expo-router'
+import { useQuery } from '@tanstack/react-query'
+import { serviceSpotsApi } from '@/apis/service-spots'
+import { NEARBY_RADIUS } from '@/constants/service-spots'
+import debounce from 'lodash.debounce'
+import ServiceSpotCallout from '@/components/service-spots/ServiceSpotCallout'
+import { isAxiosError } from 'axios'
+import { mapUtil } from '@/utils/map'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
+import { driveRequestsApi } from '@/apis/drive-requests'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import RouteCard from '@/components/RouteCard'
+import { Waypoint } from '@/apis/drive-requests/types'
+import DriveRequestPreviewSheet from '@/components/drive-requests/DriveRequestPreviewSheet'
+import DriveRequestDetailSheet from '@/components/drive-requests/DriveRequestDetailSheet'
 
 export default function MainScreen() {
   const {
     isRequesting,
+    requestDrive,
+    driveRequest,
+    points,
     location,
     route,
     origin,
-    setOrigin,
     destination,
-    setDestination,
-    requestDrive
+    setRoute,
+    setOrigin,
+    setDestination
   } = useDriveRequestContext()
+  const map = useRef<MapView | null>(null)
 
-  return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        marginTop: 10,
-        alignItems: 'center',
-        pointerEvents: 'box-none'
-      }}
-    >
-      <RouteCard
-        currentLocation={location}
-        origin={origin}
-        destination={destination}
-        onOriginChange={setOrigin}
-        onDestinationChange={setDestination}
-      />
-      {route && (
-        <View
-          absB
-          absL
-          bg-white
-          padding-15
-          gap-15
-          width="100%"
-          style={styles.footer}
-        >
-          {!isRequesting ? (
-            <>
-              <View padding-5 gap-10>
-                <Text h3B>
-                  {Math.round(parseInt(route.duration.split('s')[0]) / 60)} นาที
-                  ({serviceSpotUtil.getDistanceText(route.distanceMeters)})
-                </Text>
-                <View>
-                  <View row spread centerV>
-                    <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
-                    <Text body>
-                      {commonUtil.formatCurrency(route.priceByDistance)}
-                    </Text>
-                  </View>
-                  <View row spread centerV>
-                    <Text caption>ค่าเรียก</Text>
-                    <Text body>
-                      {commonUtil.formatCurrency(route.serviceCharge)}
-                    </Text>
-                  </View>
-                  <View row spread centerV>
-                    <Text caption>ทั้งหมด</Text>
-                    <Text h5B>{commonUtil.formatCurrency(route.total)}</Text>
-                  </View>
-                </View>
-              </View>
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null)
+  const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
 
-              <Button
-                label="เรียกรับบริการ"
-                disabled={!route}
-                onPress={requestDrive}
-              />
-            </>
-          ) : (
-            <>
-              <ActivityIndicator
-                size="large"
-                color={Colors.$backgroundPrimaryHeavy}
-              />
-              <Text center>โปรดรอสักครู่ เรากำลังหาคนขับให้คุณ...</Text>
-            </>
-          )}
+  const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
+    queryKey: ['service-spots'],
+    queryFn: () =>
+      serviceSpotsApi.getNearbyServiceSpots({
+        lat: destination?.location.lat ?? location?.coords.latitude,
+        lng: destination?.location.lng ?? location?.coords.longitude,
+        radius: NEARBY_RADIUS
+      }),
+    enabled: destination !== null || location !== null
+  })
+
+  const handleRegionChangeComplete = useCallback(
+    debounce((_, details: Details) => {
+      if (details.isGesture) return
+      if (!isRegionFirstChange) {
+        setIsRegionFirstChange(true)
+        return
+      }
+      refetchNearbyServiceSpots()
+    }, 1000),
+    [isRegionFirstChange]
+  )
+
+  const fetchRoutes = useCallback(
+    async (origin: Waypoint, destination: Waypoint) => {
+      try {
+        const data = await driveRequestsApi.previewRoute(
+          origin.location,
+          destination.location
+        )
+        const decodedPolyline = mapUtil.decodePolyline(
+          data.polyline.encodedPolyline
+        )
+        setRoute(data)
+        map.current?.fitToCoordinates(decodedPolyline, {
+          edgePadding: {
+            top: 200,
+            right: 100,
+            bottom: 200,
+            left: 100
+          }
+        })
+        console.log('Fetch routes success')
+      } catch (error) {
+        if (isAxiosError(error)) {
+          console.error(error.response?.data)
+        }
+      }
+    },
+    [map.current]
+  )
+
+  useEffect(() => {
+    if (!origin || !destination) return
+    fetchRoutes(origin, destination)
+  }, [origin, destination, fetchRoutes])
+
+  useEffect(() => {
+    if (!location) return
+    if (!initialRegion) {
+      setInitialRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01
+      })
+    }
+    if (!origin) {
+      setOrigin({
+        name: 'ตำแหน่งปัจจุบัน',
+        location: {
+          lat: location.coords.latitude,
+          lng: location.coords.longitude
+        }
+      })
+    }
+  }, [location, initialRegion, origin])
+
+  return !initialRegion ? (
+    <LoaderScreen />
+  ) : (
+    <SafeAreaView style={{ flex: 1 }}>
+      <MapView
+        ref={map}
+        maxZoomLevel={16}
+        paddingAdjustmentBehavior="automatic"
+        style={StyleSheet.absoluteFill}
+        initialRegion={initialRegion}
+        onRegionChangeComplete={handleRegionChangeComplete}
+        provider={PROVIDER_GOOGLE}
+        showsMyLocationButton={false}
+        showsUserLocation={!route}
+        toolbarEnabled={false}
+        showsCompass={false}
+      >
+        {destination && (
+          <Marker
+            coordinate={{
+              latitude: destination.location.lat,
+              longitude: destination.location.lng
+            }}
+            image={require('../../../../assets/map_marker_red.png')}
+          />
+        )}
+        {points.length > 0 && (
+          <Polyline
+            coordinates={points}
+            strokeColor="#7C89FF"
+            strokeWidth={3}
+          />
+        )}
+        {route && origin && (
+          <Marker
+            coordinate={{
+              latitude: origin.location.lat,
+              longitude: origin.location.lng
+            }}
+            image={require('../../../../assets/map_marker_blue.png')}
+          />
+        )}
+        {serviceSpots?.map((serviceSpot) => (
+          <Marker
+            onPress={() => map.current?.fitToElements()}
+            key={serviceSpot.id}
+            coordinate={{
+              latitude: serviceSpot.coords.lat,
+              longitude: serviceSpot.coords.lng
+            }}
+            image={require('../../../../assets/map_marker_orange.png')}
+          >
+            <Callout
+              tooltip
+              onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
+            >
+              <ServiceSpotCallout serviceSpot={serviceSpot} />
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
+
+      {!driveRequest && (
+        <View center marginT-20>
+          <RouteCard
+            currentLocation={location}
+            origin={origin}
+            destination={destination}
+            onOriginChange={setOrigin}
+            onDestinationChange={setDestination}
+          />
         </View>
+      )}
+      {route && !driveRequest && (
+        <DriveRequestPreviewSheet
+          route={route}
+          requestDrive={requestDrive}
+          isRequesting={isRequesting}
+        />
+      )}
+      {driveRequest && (
+        <DriveRequestDetailSheet
+          driveRequest={driveRequest}
+          hasNewMessageReceived={false}
+          onChatBubblePressed={() => {}}
+        />
       )}
     </SafeAreaView>
   )
 }
-
-const styles = StyleSheet.create({
-  footer: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30
-  }
-})

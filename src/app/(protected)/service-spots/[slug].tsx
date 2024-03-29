@@ -101,16 +101,16 @@ function ServiceSpotDetail() {
             </View>
             <View paddingV-10 center>
               <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.vehicle.manufactor}{' '}
-                {serviceSpot.serviceSpotOwner.vehicle.model}
+                {serviceSpot.serviceSpotOwner.info.vehicle.manufactor}{' '}
+                {serviceSpot.serviceSpotOwner.info.vehicle.model}
               </Text>
             </View>
             <View paddingV-10 center>
               <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.vehicle.plate}
+                {serviceSpot.serviceSpotOwner.info.vehicle.plate}
               </Text>
               <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.vehicle.province}
+                {serviceSpot.serviceSpotOwner.info.vehicle.province}
               </Text>
             </View>
           </CardModal>
@@ -203,25 +203,6 @@ function ServiceSpotDetail() {
                       </Text>
                     </Button>
                   </View>
-                  <View left paddingT-10>
-                    <Button
-                      bg-transparent
-                      avoidMinWidth
-                      avoidInnerPadding
-                      onPress={() => router.push('./calculate-price')}
-                    >
-                      <View paddingH-5>
-                        <AntDesign
-                          name="calculator"
-                          size={20}
-                          color="#FDA84B"
-                        />
-                      </View>
-                      <Text bodyB primary>
-                        อัตราค่าบริการตามระยะทาง
-                      </Text>
-                    </Button>
-                  </View>
                 </View>
                 <View paddingV-5>
                   <Text bodyB>ผู้ดูแล</Text>
@@ -238,17 +219,17 @@ function ServiceSpotDetail() {
                           height={50}
                           width={50}
                           source={{
-                            uri: serviceSpot.serviceSpotOwner.profileImage
+                            uri: serviceSpot.serviceSpotOwner.info.profileImage
                           }}
                         />
                       </View>
                       <View paddingL-10>
                         <Text bodyB>
-                          {serviceSpot?.serviceSpotOwner?.firstName}{' '}
-                          {serviceSpot?.serviceSpotOwner?.lastName}
+                          {serviceSpot.serviceSpotOwner.info.firstName}{' '}
+                          {serviceSpot.serviceSpotOwner.info.lastName}
                         </Text>
                         <Text>
-                          วินหมายเลข {serviceSpot.serviceSpotOwner.no}
+                          วินหมายเลข {serviceSpot.serviceSpotOwner.info.no}
                         </Text>
                       </View>
                     </Button>
@@ -284,14 +265,6 @@ function ServiceSpotDetail() {
               </View>
             </View>
           </ScrollView>
-          <View
-            bg-white
-            style={{ borderTopLeftRadius: 30, borderTopRightRadius: 30 }}
-          >
-            <View paddingV-10 paddingH-10>
-              <Button bodyB label="เรียกรับบริการ" />
-            </View>
-          </View>
         </>
       )}
     </View>
