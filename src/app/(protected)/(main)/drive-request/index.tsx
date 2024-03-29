@@ -64,7 +64,7 @@ export default function DriveRequestScreen() {
       <View>
         <View row centerV spread>
           <Text bodyB>รหัสเรียกรถ</Text>
-          <Text caption>{driveRequest?.refCode}</Text>
+          <Text caption>{driveRequest?.id}</Text>
         </View>
         <View row centerV spread>
           <Text bodyB>วันที่</Text>

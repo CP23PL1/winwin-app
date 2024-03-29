@@ -12,6 +12,7 @@ type Props = {
 export default function ChatMessageList({ user, messages }: Props) {
   return (
     <FlashList
+      contentContainerStyle={{ padding: 10 }}
       data={messages}
       renderItem={({ item }) => <ChatMessageItem message={item} user={user} />}
       estimatedItemSize={100}

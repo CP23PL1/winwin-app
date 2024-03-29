@@ -21,7 +21,7 @@ export default function DriveRequestChat() {
     if (!message) return
     const payload: ChatMessagePayload = {
       driveRequestSid: driveRequest.sid,
-      to: driveRequest.driver_id,
+      to: driveRequest.driverId,
       message
     }
     driveRequestSocket.emit('chat-message', payload)
