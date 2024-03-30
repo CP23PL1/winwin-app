@@ -7,7 +7,13 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import { Image, LoaderScreen, View } from 'react-native-ui-lib'
+import {
+  Colors,
+  Image,
+  LoaderScreen,
+  TabController,
+  View
+} from 'react-native-ui-lib'
 import { StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
@@ -126,7 +132,7 @@ export default function MainScreen() {
   return !initialRegion ? (
     <LoaderScreen />
   ) : (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
       <MapView
         ref={map}
         maxZoomLevel={16}
@@ -188,7 +194,7 @@ export default function MainScreen() {
       </MapView>
 
       {!driveRequest && (
-        <View center marginT-20>
+        <View center>
           <RouteCard
             currentLocation={location}
             origin={origin}
@@ -209,7 +215,7 @@ export default function MainScreen() {
         <DriveRequestDetailSheet
           driveRequest={driveRequest}
           hasNewMessageReceived={false}
-          onChatBubblePressed={() => {}}
+          onChatBubblePressed={() => router.push('/drive-request/chat')}
         />
       )}
     </SafeAreaView>

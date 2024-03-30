@@ -62,11 +62,12 @@ export default function FeedbackScreen() {
       <Stack.Screen options={{ animation: 'slide_from_right' }} />
       <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
         <View row padding-30>
-          <View flex center>
+          <View flex row center>
             <TouchableOpacity
-              absL
               br30
               style={{
+                position: 'absolute',
+                left: 5,
                 borderWidth: 1,
                 padding: 7,
                 borderColor: 'gray'

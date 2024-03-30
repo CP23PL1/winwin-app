@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import ImageViewerModal from '@/components/ImageViewerModal'
 import CardModal from '@/components/CardModal'
 import { AntDesign } from '@expo/vector-icons'
+import CustomMarkerImage from '@/components/map/CustomMarkerImage'
 
 type Params = {
   slug: string
@@ -132,12 +133,13 @@ function ServiceSpotDetail() {
               >
                 <MapMarker
                   key={serviceSpot?.id}
-                  image={require('../../../../assets/map_marker_orange.png')}
                   coordinate={{
                     latitude: serviceSpot.coords.lat || 0,
                     longitude: serviceSpot.coords.lng || 0
                   }}
-                />
+                >
+                  <CustomMarkerImage color="orange" />
+                </MapMarker>
               </MapView>
               <View paddingH-15 paddingV-5 paddingT-10>
                 <View row paddingV-5>
