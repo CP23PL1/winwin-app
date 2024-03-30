@@ -2,7 +2,10 @@ import {
   DriveRequest,
   DriveRequestSessionStatus
 } from '@/sockets/drive-request/type'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetView
+} from '@gorhom/bottom-sheet'
 import moment from 'moment'
 import React from 'react'
 import { Colors, View, Text, Image } from 'react-native-ui-lib'
@@ -21,9 +24,9 @@ export default function DriveRequestDetailSheet({
   onChatBubblePressed
 }: Props) {
   return (
-    <BottomSheet snapPoints={['40%']}>
-      <BottomSheetView>
-        <View height={300} padding-25 gap-20 style={styles.footer}>
+    <BottomSheet snapPoints={['45%']}>
+      <BottomSheetScrollView>
+        <View padding-25 gap-20 style={styles.footer}>
           <View>
             <Text h4B>
               {driveRequest.status === DriveRequestSessionStatus.ON_GOING &&
@@ -96,7 +99,7 @@ export default function DriveRequestDetailSheet({
             </View>
           </View>
         </View>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
   )
 }

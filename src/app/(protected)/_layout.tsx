@@ -7,7 +7,7 @@ import { usersApi } from '@/apis/users'
 import DriveRequestContextProvider from '@/contexts/DriveRequestContext'
 
 export default function ProtectedLayout() {
-  const { user, isLoading: isAuth0Loading } = useAuth0()
+  const { user, isLoading: isAuth0Loading, clearSession } = useAuth0()
 
   const { data: userInfo, isLoading: isUserInfoLoading } = useQuery({
     queryKey: ['user-info'],

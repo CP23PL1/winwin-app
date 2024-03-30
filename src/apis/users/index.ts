@@ -1,6 +1,7 @@
-import { User } from 'react-native-auth0'
 import axiosInstance from '@/libs/axios'
-import { CreateUser, UserIdentificationType } from './type'
+import { CreateUser, User, UserIdentificationType } from './type'
+import { Paginate, PaginateParams } from '../shared/type'
+import { DriveRequest } from '@/sockets/drive-request/type'
 
 class UsersApi {
   async getUserBy(
@@ -20,6 +21,12 @@ class UsersApi {
 
   async createUser(user: CreateUser) {
     return axiosInstance.post<User>('/users', user).then((res) => res.data)
+  }
+
+  async getMyDriveRequests(params?: PaginateParams) {
+    return axiosInstance<Paginate<DriveRequest>>('/users/me/drive-requests', {
+      params
+    }).then((res) => res.data)
   }
 }
 

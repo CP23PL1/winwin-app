@@ -14,6 +14,11 @@ export enum DriveRequestSessionStatus {
   CANCELLED = 'cancelled'
 }
 
+export enum DriveRequestStatus {
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
 export type RequestDrive = {
   origin: Coordinate
   destination: Coordinate
@@ -22,13 +27,13 @@ export type RequestDrive = {
 
 export type DriveRequest = {
   sid?: string
-  id?: string
-  userId?: string
-  driverId?: string
+  id: string
+  userId: string
+  driverId: string
   user: User
   driver: Driver
-  origin?: Waypoint
-  destination?: Waypoint
+  origin: Waypoint
+  destination: Waypoint
   route?: {
     duration: string
     distanceMeters: number
@@ -37,6 +42,6 @@ export type DriveRequest = {
     }
   }
   paidAmount: number
-  status?: DriveRequestSessionStatus
-  createdAt?: string
+  status: DriveRequestSessionStatus
+  createdAt: string
 }
