@@ -7,7 +7,7 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import { LoaderScreen, View } from 'react-native-ui-lib'
+import { Image, LoaderScreen, View } from 'react-native-ui-lib'
 import { StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
@@ -24,6 +24,7 @@ import RouteCard from '@/components/RouteCard'
 import { Waypoint } from '@/apis/drive-requests/types'
 import DriveRequestPreviewSheet from '@/components/drive-requests/DriveRequestPreviewSheet'
 import DriveRequestDetailSheet from '@/components/drive-requests/DriveRequestDetailSheet'
+import CustomMarkerImage from '@/components/map/CustomMarkerImage'
 
 export default function MainScreen() {
   const {
@@ -145,8 +146,9 @@ export default function MainScreen() {
               latitude: destination.location.lat,
               longitude: destination.location.lng
             }}
-            image={require('../../../../assets/map_marker_red.png')}
-          />
+          >
+            <CustomMarkerImage color="red" />
+          </Marker>
         )}
         {points.length > 0 && (
           <Polyline
@@ -161,8 +163,9 @@ export default function MainScreen() {
               latitude: origin.location.lat,
               longitude: origin.location.lng
             }}
-            image={require('../../../../assets/map_marker_blue.png')}
-          />
+          >
+            <CustomMarkerImage color="blue" />
+          </Marker>
         )}
         {serviceSpots?.map((serviceSpot) => (
           <Marker
@@ -172,8 +175,8 @@ export default function MainScreen() {
               latitude: serviceSpot.coords.lat,
               longitude: serviceSpot.coords.lng
             }}
-            image={require('../../../../assets/map_marker_orange.png')}
           >
+            <CustomMarkerImage color="orange" />
             <Callout
               tooltip
               onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
