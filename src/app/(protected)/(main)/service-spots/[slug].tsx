@@ -86,13 +86,13 @@ function ServiceSpotDetail() {
               <Image
                 borderRadius={100}
                 style={{ height: 150, width: 150 }}
-                src={serviceSpot.serviceSpotOwner.profileImage}
+                src={serviceSpot.serviceSpotOwner.info.profileImage}
               />
             </View>
             <View paddingV-10 center>
               <Text h4B white>
-                {serviceSpot.serviceSpotOwner.firstName}{' '}
-                {serviceSpot.serviceSpotOwner.lastName}
+                {serviceSpot.serviceSpotOwner.info.firstName}{' '}
+                {serviceSpot.serviceSpotOwner.info.lastName}
               </Text>
             </View>
             <View paddingV-10 center>
@@ -168,21 +168,7 @@ function ServiceSpotDetail() {
                   </View>
                 </View>
                 <View>
-                  <Text>
-                    {serviceSpot.addressLine1} {serviceSpot?.addressLine2 || ''}
-                    {
-                      // @ts-ignore
-                      serviceSpot.address.nameTH
-                    }{' '}
-                    {
-                      // @ts-ignore
-                      serviceSpot.address.district.nameTH
-                    }{' '}
-                    {
-                      // @ts-ignore
-                      serviceSpot.address.district.province.nameTH
-                    }
-                  </Text>
+                  <Text>{serviceSpot.formattedAddress}</Text>
                 </View>
                 <View paddingV-5>
                   <View row centerV>

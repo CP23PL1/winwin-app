@@ -6,6 +6,7 @@ import OTPTextInput from 'react-native-otp-textinput'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, Text, Button } from 'react-native-ui-lib'
 import { useQueryClient } from '@tanstack/react-query'
+import Toast from 'react-native-toast-message'
 
 type Params = {
   phoneNumber: string
@@ -28,23 +29,28 @@ export default function OtpScreen() {
   const [code, setCode] = useState('')
 
   const handleAuthorizeWithSMS = async () => {
-    if (!code) {
-      return Alert.alert('กรุณากรอกรหัสผ่านชั่วคราว')
-    }
     try {
       setIsSubmitting(true)
-      await authorizeWithSMS({
+      const credentials = await authorizeWithSMS({
         phoneNumber: phoneNumber!,
         code,
         audience: process.env.EXPO_PUBLIC_AUTH0_AUDIENCE,
         scope: process.env.EXPO_PUBLIC_AUTH0_SCOPE
       })
+      if (!credentials) {
+        throw new Error('Credentials not found')
+      }
       await queryClient.invalidateQueries({
         queryKey: ['user-info'],
         type: 'all'
       })
       router.replace('/(protected)/')
     } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'เกิดข้อผิดพลาด',
+        text2: 'รหัสผ่านชั่วคราวไม่ถูกต้องหรือหมดอายุ'
+      })
       console.error(error)
     } finally {
       setIsSubmitting(false)

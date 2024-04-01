@@ -1,7 +1,9 @@
 import { DriveRequest } from '@/sockets/drive-request/type'
 import { FlashList, FlashListProps } from '@shopify/flash-list'
-import { View } from 'react-native-ui-lib'
+import { Colors, Text, View } from 'react-native-ui-lib'
 import DriveRequestListItem from './DriveRequestListItem'
+import { Entypo } from '@expo/vector-icons'
+import DriveRequestListEmpty from './DriveRequestListEmpty'
 
 type Props = {
   data: DriveRequest[]

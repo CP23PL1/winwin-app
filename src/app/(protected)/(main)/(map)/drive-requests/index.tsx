@@ -1,7 +1,9 @@
 import { usersApi } from '@/apis/users'
 import DriveRequestList from '@/components/drive-requests/DriveRequestList'
+import DriveRequestListEmpty from '@/components/drive-requests/DriveRequestListEmpty'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
+import { useMemo } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { Colors, LoaderScreen, Text, View } from 'react-native-ui-lib'
 
@@ -22,13 +24,20 @@ export default function DriveRequestsScreen() {
     initialPageParam: 0
   })
 
+  const data = useMemo(
+    () => driveRequests?.pages.flatMap((page) => page.data) ?? [],
+    [driveRequests]
+  )
+
   if (!driveRequests) {
     return <LoaderScreen />
   }
 
-  return (
+  return data.length <= 0 ? (
+    <DriveRequestListEmpty />
+  ) : (
     <DriveRequestList
-      data={driveRequests.pages.flatMap((page) => page.data)}
+      data={data}
       listProps={{
         contentContainerStyle: {
           padding: 10

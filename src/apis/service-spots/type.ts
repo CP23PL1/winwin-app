@@ -1,13 +1,9 @@
-import { Driver } from '../drivers/type'
-import { Coordinate, SubDistrict } from '../shared/type'
+import { Coordinate } from '../shared/type'
 
 export type ServiceSpot = {
   id: number
   name: string
-  placeId: string
-  addressLine1: string
-  addressLine2?: string
-  address: SubDistrict
+  formattedAddress: string
   coords: Coordinate
   priceRateImageUrl: string
   serviceSpotOwner: Driver

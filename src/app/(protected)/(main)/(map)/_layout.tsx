@@ -1,16 +1,23 @@
 import { usersApi } from '@/apis/users'
 import CustomDrawer from '@/components/CustomDrawer'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Drawer } from 'expo-router/drawer'
+import { useCallback } from 'react'
 import { useAuth0 } from 'react-native-auth0'
 import { LoaderScreen } from 'react-native-ui-lib'
 
 export default function MapLayout() {
+  const queryClient = useQueryClient()
   const { clearSession } = useAuth0()
   const { data: userInfo } = useQuery({
     queryKey: ['user-info'],
     queryFn: usersApi.getMyUserInfo
   })
+
+  const logout = useCallback(async () => {
+    await clearSession()
+    queryClient.clear()
+  }, [clearSession, queryClient])
 
   if (!userInfo) {
     return <LoaderScreen />
@@ -32,7 +39,7 @@ export default function MapLayout() {
         <CustomDrawer
           user={userInfo}
           drawerContentComponentProps={props}
-          onLogout={clearSession}
+          onLogout={logout}
         />
       )}
     >

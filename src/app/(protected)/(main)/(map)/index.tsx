@@ -103,6 +103,14 @@ export default function MainScreen() {
     [map.current]
   )
 
+  const moveToMarker = useCallback(
+    (identifier: string) => {
+      if (!map.current) return
+      map.current.fitToSuppliedMarkers([identifier])
+    },
+    [map.current]
+  )
+
   useEffect(() => {
     if (!origin || !destination) return
     fetchRoutes(origin, destination)
@@ -175,7 +183,8 @@ export default function MainScreen() {
         )}
         {serviceSpots?.map((serviceSpot) => (
           <Marker
-            onPress={() => map.current?.fitToElements()}
+            identifier={serviceSpot.id.toString()}
+            onPress={() => moveToMarker(serviceSpot.id.toString())}
             key={serviceSpot.id}
             coordinate={{
               latitude: serviceSpot.coords.lat,
