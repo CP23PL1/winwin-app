@@ -28,6 +28,12 @@ class UsersApi {
       params
     }).then((res) => res.data)
   }
+
+  async getMyDriveRequestById(id: string) {
+    return axiosInstance
+      .get<DriveRequest>(`/users/me/drive-requests/${id}`)
+      .then((res) => res.data)
+  }
 }
 
 export const usersApi = new UsersApi()

@@ -1,4 +1,4 @@
-import { driveRequestsApi } from '@/apis/drive-requests'
+import { usersApi } from '@/apis/users'
 import Waypoint from '@/components/Waypoint'
 import DriverInfo from '@/components/drive-requests/DriverInfo'
 import CustomMarkerImage from '@/components/map/CustomMarkerImage'
@@ -24,7 +24,7 @@ export default function DriveRequestDetailScreen() {
 
   const { data: driveRequest } = useQuery({
     queryKey: ['drive-requests', slug],
-    queryFn: () => driveRequestsApi.getDriveRequestById(slug as string),
+    queryFn: () => usersApi.getMyDriveRequestById(slug as string),
     enabled: !!slug
   })
 
