@@ -8,9 +8,8 @@ import {
   Button,
   TouchableOpacity
 } from 'react-native-ui-lib'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import { useCallback, useState } from 'react'
-import { MaterialIcons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { Redirect, Stack, router } from 'expo-router'
@@ -151,7 +150,7 @@ export default function FeedbackScreen() {
             disabled={isPending}
             onPress={() =>
               submitFeedback({
-                driveRequestId: driveRequest.id!,
+                driveRequestId: driveRequest.id,
                 category: selectedCategories.map(
                   (c) => c.value
                 ) as FeedbackCategory[],
