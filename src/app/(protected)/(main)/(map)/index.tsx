@@ -7,16 +7,10 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import {
-  Colors,
-  Image,
-  LoaderScreen,
-  TabController,
-  View
-} from 'react-native-ui-lib'
-import { StyleSheet } from 'react-native'
+import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
+import { Dimensions, Pressable, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { NEARBY_RADIUS } from '@/constants/service-spots'
 import debounce from 'lodash.debounce'
@@ -31,8 +25,10 @@ import { Waypoint } from '@/apis/drive-requests/types'
 import DriveRequestPreviewSheet from '@/components/drive-requests/DriveRequestPreviewSheet'
 import DriveRequestDetailSheet from '@/components/drive-requests/DriveRequestDetailSheet'
 import CustomMarkerImage from '@/components/map/CustomMarkerImage'
+import { MaterialIcons } from '@expo/vector-icons'
 
 export default function MainScreen() {
+  const queryClient = useQueryClient()
   const {
     isRequesting,
     requestDrive,
@@ -93,7 +89,10 @@ export default function MainScreen() {
             left: 100
           }
         })
-        console.log('Fetch routes success')
+        queryClient.invalidateQueries({
+          queryKey: ['service-spots'],
+          type: 'all'
+        })
       } catch (error) {
         if (isAxiosError(error)) {
           console.error(error.response?.data)
@@ -201,6 +200,23 @@ export default function MainScreen() {
           </Marker>
         ))}
       </MapView>
+      {!driveRequest && !route && (
+        <Pressable
+          style={{
+            position: 'absolute',
+            bottom: 40,
+            right: 25,
+            justifyContent: 'center',
+            elevation: 8,
+            backgroundColor: 'white',
+            borderRadius: 50,
+            padding: 10
+          }}
+          onPress={() => map.current?.animateToRegion(initialRegion, 1000)}
+        >
+          <MaterialIcons name="my-location" size={24} color={Colors.blue40} />
+        </Pressable>
+      )}
 
       {!driveRequest && (
         <View center>

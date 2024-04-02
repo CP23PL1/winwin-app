@@ -1,15 +1,13 @@
 import { DriveRequest } from '@/sockets/drive-request/type'
 import { FlashList, FlashListProps } from '@shopify/flash-list'
-import { Colors, Text, View } from 'react-native-ui-lib'
+import { View } from 'react-native-ui-lib'
 import DriveRequestListItem from './DriveRequestListItem'
-import { Entypo } from '@expo/vector-icons'
-import DriveRequestListEmpty from './DriveRequestListEmpty'
 
 type Props = {
-  data: DriveRequest[]
-  listProps?: Partial<FlashListProps<DriveRequest>>
-  onEndReached?: () => void
-  onDriveRequestPress?: (driveRequest: DriveRequest) => void
+  readonly data: DriveRequest[]
+  readonly listProps?: Partial<FlashListProps<DriveRequest>>
+  readonly onEndReached?: () => void
+  readonly onDriveRequestPress?: (driveRequest: DriveRequest) => void
 }
 
 export default function DriveRequestList({

@@ -5,7 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useMemo } from 'react'
 import { ActivityIndicator } from 'react-native'
-import { Colors, LoaderScreen, Text, View } from 'react-native-ui-lib'
+import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
 
 export default function DriveRequestsScreen() {
   const {
