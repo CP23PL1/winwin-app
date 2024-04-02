@@ -8,9 +8,9 @@ import MapView, {
   Region
 } from 'react-native-maps'
 import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
-import { Dimensions, Pressable, StyleSheet } from 'react-native'
+import { Pressable, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { NEARBY_RADIUS } from '@/constants/service-spots'
 import debounce from 'lodash.debounce'
@@ -28,7 +28,6 @@ import CustomMarkerImage from '@/components/map/CustomMarkerImage'
 import { MaterialIcons } from '@expo/vector-icons'
 
 export default function MainScreen() {
-  const queryClient = useQueryClient()
   const {
     isRequesting,
     requestDrive,
@@ -45,7 +44,6 @@ export default function MainScreen() {
   const map = useRef<MapView | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
-  const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
 
   const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
     queryKey: ['service-spots'],
@@ -61,13 +59,9 @@ export default function MainScreen() {
   const handleRegionChangeComplete = useCallback(
     debounce((_, details: Details) => {
       if (details.isGesture) return
-      if (!isRegionFirstChange) {
-        setIsRegionFirstChange(true)
-        return
-      }
       refetchNearbyServiceSpots()
-    }, 1000),
-    [isRegionFirstChange]
+    }, 500),
+    [refetchNearbyServiceSpots]
   )
 
   const fetchRoutes = useCallback(
@@ -88,10 +82,6 @@ export default function MainScreen() {
             bottom: 200,
             left: 100
           }
-        })
-        queryClient.invalidateQueries({
-          queryKey: ['service-spots'],
-          type: 'all'
         })
       } catch (error) {
         if (isAxiosError(error)) {
@@ -133,8 +123,24 @@ export default function MainScreen() {
           lng: location.coords.longitude
         }
       })
+      map.current?.animateToRegion(
+        {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01
+        },
+        1000
+      )
     }
-  }, [location, initialRegion, origin])
+  }, [
+    location,
+    initialRegion,
+    origin,
+    map.current,
+    setOrigin,
+    setInitialRegion
+  ])
 
   return !initialRegion ? (
     <LoaderScreen />
@@ -180,25 +186,26 @@ export default function MainScreen() {
             <CustomMarkerImage color="blue" />
           </Marker>
         )}
-        {serviceSpots?.map((serviceSpot) => (
-          <Marker
-            identifier={serviceSpot.id.toString()}
-            onPress={() => moveToMarker(serviceSpot.id.toString())}
-            key={serviceSpot.id}
-            coordinate={{
-              latitude: serviceSpot.coords.lat,
-              longitude: serviceSpot.coords.lng
-            }}
-          >
-            <CustomMarkerImage color="orange" />
-            <Callout
-              tooltip
-              onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
+        {!driveRequest &&
+          serviceSpots?.map((serviceSpot) => (
+            <Marker
+              identifier={serviceSpot.id.toString()}
+              onPress={() => moveToMarker(serviceSpot.id.toString())}
+              key={serviceSpot.id}
+              coordinate={{
+                latitude: serviceSpot.coords.lat,
+                longitude: serviceSpot.coords.lng
+              }}
             >
-              <ServiceSpotCallout serviceSpot={serviceSpot} />
-            </Callout>
-          </Marker>
-        ))}
+              <CustomMarkerImage color="orange" />
+              <Callout
+                tooltip
+                onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
+              >
+                <ServiceSpotCallout serviceSpot={serviceSpot} />
+              </Callout>
+            </Marker>
+          ))}
       </MapView>
       {!driveRequest && !route && (
         <Pressable

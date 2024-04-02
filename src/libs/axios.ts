@@ -15,7 +15,6 @@ axiosInstance.interceptors.request.use(async (config) => {
   try {
     const credential = await auth0.credentialsManager.getCredentials()
     if (credential.accessToken) {
-      console.log(credential.accessToken)
       config.headers.Authorization = `Bearer ${credential.accessToken}`
     }
     return config

@@ -20,7 +20,7 @@ import { LatLng } from 'react-native-maps'
 import { mapUtil } from '@/utils/map'
 
 type Props = {
-  children: React.ReactNode
+  readonly children: React.ReactNode
 }
 
 type DriveRequestContextT = {
@@ -126,6 +126,37 @@ export default function DriveRequestContextProvider({ children }: Props) {
     [reset]
   )
 
+  const value = useMemo(
+    () => ({
+      points,
+      isRequesting,
+      location,
+      route,
+      origin,
+      destination,
+      driveRequest,
+      setOrigin,
+      setDestination,
+      setRoute,
+      requestDrive,
+      reset
+    }),
+    [
+      points,
+      isRequesting,
+      location,
+      route,
+      origin,
+      destination,
+      driveRequest,
+      setOrigin,
+      setDestination,
+      setRoute,
+      requestDrive,
+      reset
+    ]
+  )
+
   // Handle socket io events on mount with cleanup
   useEffect(() => {
     driveRequestSocket.on('drive-request-created', handleDriveRequestCreated)
@@ -169,22 +200,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   }, [])
 
   return (
-    <DriveRequestContext.Provider
-      value={{
-        points,
-        isRequesting,
-        location,
-        route,
-        origin,
-        destination,
-        driveRequest,
-        setOrigin,
-        setDestination,
-        setRoute,
-        requestDrive,
-        reset
-      }}
-    >
+    <DriveRequestContext.Provider value={value}>
       {children}
     </DriveRequestContext.Provider>
   )
