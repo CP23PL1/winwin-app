@@ -7,8 +7,8 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
-import { Pressable, StyleSheet } from 'react-native'
+import { LoaderScreen, View } from 'react-native-ui-lib'
+import { StyleSheet } from 'react-native'
 import { router } from 'expo-router'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
@@ -25,7 +25,6 @@ import { Waypoint } from '@/apis/drive-requests/types'
 import DriveRequestPreviewSheet from '@/components/drive-requests/DriveRequestPreviewSheet'
 import DriveRequestDetailSheet from '@/components/drive-requests/DriveRequestDetailSheet'
 import CustomMarkerImage from '@/components/map/CustomMarkerImage'
-import { MaterialIcons } from '@expo/vector-icons'
 
 export default function MainScreen() {
   const {
@@ -44,6 +43,7 @@ export default function MainScreen() {
   const map = useRef<MapView | null>(null)
 
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
+  const [isRegionFirstChange, setIsRegionFirstChange] = useState(false)
 
   const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
     queryKey: ['service-spots'],
@@ -59,9 +59,13 @@ export default function MainScreen() {
   const handleRegionChangeComplete = useCallback(
     debounce((_, details: Details) => {
       if (details.isGesture) return
+      if (!isRegionFirstChange) {
+        setIsRegionFirstChange(true)
+        return
+      }
       refetchNearbyServiceSpots()
-    }, 500),
-    [refetchNearbyServiceSpots]
+    }, 1000),
+    [isRegionFirstChange]
   )
 
   const fetchRoutes = useCallback(
@@ -83,19 +87,12 @@ export default function MainScreen() {
             left: 100
           }
         })
+        console.log('Fetch routes success')
       } catch (error) {
         if (isAxiosError(error)) {
           console.error(error.response?.data)
         }
       }
-    },
-    [map.current]
-  )
-
-  const moveToMarker = useCallback(
-    (identifier: string) => {
-      if (!map.current) return
-      map.current.fitToSuppliedMarkers([identifier])
     },
     [map.current]
   )
@@ -123,24 +120,8 @@ export default function MainScreen() {
           lng: location.coords.longitude
         }
       })
-      map.current?.animateToRegion(
-        {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01
-        },
-        1000
-      )
     }
-  }, [
-    location,
-    initialRegion,
-    origin,
-    map.current,
-    setOrigin,
-    setInitialRegion
-  ])
+  }, [location, initialRegion, origin])
 
   return !initialRegion ? (
     <LoaderScreen />
@@ -186,44 +167,25 @@ export default function MainScreen() {
             <CustomMarkerImage color="blue" />
           </Marker>
         )}
-        {!driveRequest &&
-          serviceSpots?.map((serviceSpot) => (
-            <Marker
-              identifier={serviceSpot.id.toString()}
-              onPress={() => moveToMarker(serviceSpot.id.toString())}
-              key={serviceSpot.id}
-              coordinate={{
-                latitude: serviceSpot.coords.lat,
-                longitude: serviceSpot.coords.lng
-              }}
+        {serviceSpots?.map((serviceSpot) => (
+          <Marker
+            onPress={() => map.current?.fitToElements()}
+            key={serviceSpot.id}
+            coordinate={{
+              latitude: serviceSpot.coords.lat,
+              longitude: serviceSpot.coords.lng
+            }}
+          >
+            <CustomMarkerImage color="orange" />
+            <Callout
+              tooltip
+              onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
             >
-              <CustomMarkerImage color="orange" />
-              <Callout
-                tooltip
-                onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
-              >
-                <ServiceSpotCallout serviceSpot={serviceSpot} />
-              </Callout>
-            </Marker>
-          ))}
+              <ServiceSpotCallout serviceSpot={serviceSpot} />
+            </Callout>
+          </Marker>
+        ))}
       </MapView>
-      {!driveRequest && !route && (
-        <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            right: 25,
-            justifyContent: 'center',
-            elevation: 8,
-            backgroundColor: 'white',
-            borderRadius: 50,
-            padding: 10
-          }}
-          onPress={() => map.current?.animateToRegion(initialRegion, 1000)}
-        >
-          <MaterialIcons name="my-location" size={24} color={Colors.blue40} />
-        </Pressable>
-      )}
 
       {!driveRequest && (
         <View center>
