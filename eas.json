@@ -9,6 +9,7 @@
       "distribution": "internal",
       "env": {
         "APP_NAME": "WinWin (Dev)",
+        "APP_VERSION": "0.0.0-development",
         "EXPO_PUBLIC_API_URL": "https://capstone23.sit.kmutt.ac.th/pl1/v1",
         "EXPO_PUBLIC_SOCKET_URL": "https://capstone23.sit.kmutt.ac.th",
         "EXPO_PUBLIC_SOCKET_PATH": "/pl1-socket",

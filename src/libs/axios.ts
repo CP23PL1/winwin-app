@@ -2,7 +2,6 @@ import axios from 'axios'
 import auth0 from './auth0'
 
 const baseURL = process.env.EXPO_PUBLIC_API_URL
-console.log(baseURL)
 
 const axiosInstance = axios.create({
   baseURL,

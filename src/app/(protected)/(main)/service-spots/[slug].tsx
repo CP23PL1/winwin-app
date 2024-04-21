@@ -1,16 +1,13 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Alert, Linking, StyleSheet, ScrollView } from 'react-native'
 import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
 import MapView, { MapMarker } from 'react-native-maps'
-import { URLSearchParams } from 'react-native-url-polyfill'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
-import { FontAwesome5 } from '@expo/vector-icons'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 import ImageViewerModal from '@/components/ImageViewerModal'
 import CardModal from '@/components/CardModal'
-import { AntDesign } from '@expo/vector-icons'
 import CustomMarkerImage from '@/components/map/CustomMarkerImage'
 
 type Params = {
@@ -18,7 +15,6 @@ type Params = {
 }
 
 function ServiceSpotDetail() {
-  const router = useRouter()
   const { slug } = useLocalSearchParams<Params>()
   const serviceSpotId = useMemo(() => parseInt(slug!), [slug])
   const [showPriceRateImageModal, setShowPriceRateImageModal] = useState(false)

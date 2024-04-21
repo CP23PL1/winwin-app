@@ -2,7 +2,7 @@ import {
   DriveRequestPreviewResponse,
   Waypoint
 } from '@/apis/drive-requests/types'
-import { Coordinate } from '@/apis/shared/type'
+import { Coordinate, Driver } from '@/apis/shared/type'
 import { User } from '@/apis/users/type'
 
 export enum DriveRequestSessionStatus {

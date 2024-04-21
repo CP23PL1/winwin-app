@@ -1,4 +1,4 @@
-import { Coordinate } from '../shared/type'
+import { Coordinate, Driver, SubDistrict } from '../shared/type'
 
 export type ServiceSpot = {
   id: number

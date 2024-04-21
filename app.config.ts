@@ -49,6 +49,13 @@ const config: ExpoConfig = {
         organization: 'cp23pl1',
         project: 'winwin-app'
       }
+    ],
+    [
+      'expo-location',
+      {
+        locationAlwaysAndWhenInUsePermission:
+          'Allow $(PRODUCT_NAME) to use your location.'
+      }
     ]
   ],
   owner: 'cp23pl1',
