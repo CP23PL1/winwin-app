@@ -169,7 +169,14 @@ export default function MainScreen() {
         )}
         {serviceSpots?.map((serviceSpot) => (
           <Marker
-            onPress={() => map.current?.fitToElements()}
+            onPress={() =>
+              map.current?.animateCamera({
+                center: {
+                  latitude: serviceSpot.coords.lat,
+                  longitude: serviceSpot.coords.lng
+                }
+              })
+            }
             key={serviceSpot.id}
             coordinate={{
               latitude: serviceSpot.coords.lat,
