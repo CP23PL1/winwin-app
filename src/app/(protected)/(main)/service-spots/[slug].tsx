@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Alert, Linking, StyleSheet, ScrollView } from 'react-native'
 import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
-import MapView, { MapMarker } from 'react-native-maps'
+import MapView, { MapMarker, Marker } from 'react-native-maps'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -125,17 +125,18 @@ function ServiceSpotDetail() {
                 minZoomLevel={15}
                 showsUserLocation
                 showsMyLocationButton={false}
-                toolbarEnabled={true}
+                toolbarEnabled={false}
               >
-                <MapMarker
+                <Marker
                   key={serviceSpot?.id}
                   coordinate={{
                     latitude: serviceSpot.coords.lat || 0,
                     longitude: serviceSpot.coords.lng || 0
                   }}
+                  tracksViewChanges={false}
                 >
                   <CustomMarkerImage color="orange" />
-                </MapMarker>
+                </Marker>
               </MapView>
               <View paddingH-15 paddingV-5 paddingT-10>
                 <View row paddingV-5>

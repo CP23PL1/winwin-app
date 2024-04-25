@@ -1,34 +1,11 @@
-export const feedbackOptions = [
-  {
-    value: 1,
-    label: 'แย่มาก',
-    image: require(`../../assets/feedback/emoji_star_1.png`)
-  },
-  {
-    value: 2,
-    label: 'แย่',
-    image: require(`../../assets/feedback/emoji_star_2.png`)
-  },
-  {
-    value: 3,
-    label: 'ปานกลาง',
-    image: require(`../../assets/feedback/emoji_star_3.png`)
-  },
-  {
-    value: 4,
-    label: 'ดี',
-    image: require(`../../assets/feedback/emoji_star_4.png`)
-  },
-  {
-    value: 5,
-    label: 'ดีมาก',
-    image: require(`../../assets/feedback/emoji_star_5.png`)
-  }
-] as const
+import { FeedbackCategory } from '@/apis/drive-requests/types'
 
-export type FeedbackOptions = (typeof feedbackOptions)[number]
+export type FeedbackCategoryOption = {
+  value: FeedbackCategory
+  label: string
+}
 
-export const feedbackCategoryOptions = [
+export const feedbackCategoryOptions: FeedbackCategoryOption[] = [
   {
     value: 'manner',
     label: 'มารยาท'
@@ -46,5 +23,3 @@ export const feedbackCategoryOptions = [
     label: 'ยานพาหนะ'
   }
 ] as const
-
-export type FeedbackCategoryOptions = (typeof feedbackCategoryOptions)[number]

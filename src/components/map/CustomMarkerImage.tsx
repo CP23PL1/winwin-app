@@ -4,14 +4,15 @@ import { Image } from 'react-native-ui-lib'
 type CustomMarkerColor = 'blue' | 'red' | 'orange'
 type Props = {
   color: CustomMarkerColor
+  size?: number
 }
 
-export default function CustomMarkerImage({ color }: Props) {
+export default function CustomMarkerImage({ color, size = 40 }: Props) {
   const colorAsset = useMemo(() => getMarkerAsset(color), [color])
 
   return (
     <Image
-      style={{ width: 40, height: 40 }}
+      style={{ width: size, height: size }}
       resizeMode="contain"
       source={colorAsset}
     />

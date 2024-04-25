@@ -19,7 +19,10 @@ export type Waypoint = {
 }
 
 export type CreateFeedback = {
-  driveRequestId: string
   rating: number
-  category: FeedbackCategory[]
+  category: FeedbackCategory
+}
+
+export type FeedbackMap = {
+  [key in FeedbackCategory]: number
 }

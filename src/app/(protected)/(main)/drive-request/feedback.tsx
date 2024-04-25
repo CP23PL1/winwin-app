@@ -1,34 +1,38 @@
 import {
   View,
   Text,
-  Image,
   Colors,
-  GridList,
-  Chip,
-  Button,
-  TouchableOpacity
+  TouchableOpacity,
+  Button
 } from 'react-native-ui-lib'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { Redirect, Stack, router } from 'expo-router'
 import { useMutation } from '@tanstack/react-query'
 import { driveRequestsApi } from '@/apis/drive-requests'
+import { feedbackCategoryOptions } from '@/constants/feedback'
 import { FeedbackCategory } from '@/apis/drive-requests/types'
-import {
-  FeedbackCategoryOptions,
-  FeedbackOptions,
-  feedbackCategoryOptions,
-  feedbackOptions
-} from '@/constants/feedback'
+import { FlatList } from 'react-native-gesture-handler'
+import FeedbackCategoryListItem from '@/components/feedback/FeedbackCategoryListItem'
+import { StyleSheet } from 'react-native'
+
+type FeedbackMap = {
+  [key in FeedbackCategory]: number
+}
 
 export default function FeedbackScreen() {
   const { driveRequest, reset } = useDriveRequestContext()
-  const [rating, setRating] = useState<FeedbackOptions>(feedbackOptions[0])
-  const [selectedCategories, setSelectedCategories] = useState<
-    FeedbackCategoryOptions[]
-  >([])
+  const [feedbacks, setFeedbacks] = useState<FeedbackMap>(
+    feedbackCategoryOptions.reduce(
+      (acc, category) => ({
+        ...acc,
+        [category.value]: 0
+      }),
+      {} as FeedbackMap
+    )
+  )
 
   const handleSuccess = useCallback(() => {
     reset()
@@ -40,37 +44,38 @@ export default function FeedbackScreen() {
     onSuccess: handleSuccess
   })
 
-  const handleSelectCategory = useCallback(
-    (category: FeedbackCategoryOptions) => {
-      const newCategory = [...selectedCategories]
-      const index = newCategory.findIndex((c) => c.value === category.value)
-      if (index === -1) {
-        setSelectedCategories([...newCategory, category])
-        return
-      }
-      newCategory.splice(index, 1)
-      setSelectedCategories(newCategory)
+  const handleRatingChange = useCallback(
+    (category: FeedbackCategory, value: number) => {
+      setFeedbacks((prev) => ({
+        ...prev,
+        [category]: value
+      }))
     },
-    [selectedCategories, setSelectedCategories]
+    [setFeedbacks]
   )
+
+  const handleSubmitFeedback = useCallback(() => {
+    if (!driveRequest) return
+    submitFeedback({
+      driveRequestId: driveRequest.id,
+      data: Object.entries(feedbacks).map(([category, value]) => ({
+        category: category as FeedbackCategory,
+        rating: value
+      }))
+    })
+  }, [driveRequest, submitFeedback, feedbacks])
 
   if (!driveRequest) return <Redirect href="/" />
 
   return (
     <>
       <Stack.Screen options={{ animation: 'slide_from_right' }} />
-      <SafeAreaView style={{ flex: 1, backgroundColor: Colors.white }}>
-        <View row padding-30>
+      <SafeAreaView style={styles.container}>
+        <View row>
           <View flex row center>
             <TouchableOpacity
               br30
-              style={{
-                position: 'absolute',
-                left: 5,
-                borderWidth: 1,
-                padding: 7,
-                borderColor: 'gray'
-              }}
+              style={styles.backButton}
               onPress={handleSuccess}
             >
               <Ionicons name="arrow-back-outline" size={24} color="gray" />
@@ -78,88 +83,41 @@ export default function FeedbackScreen() {
             <Text h4B>ให้คะแนนคนขับ</Text>
           </View>
         </View>
-        <View center>
-          <Image
-            width={200}
-            height={300}
-            resizeMode="contain"
-            source={rating.image}
-          />
-          <View gap-20 center paddingB-25>
-            <Text>การให้บริการเป็นอย่างไร?</Text>
-            <View row gap-10>
-              {feedbackOptions.map((r) => (
-                <MaterialIcons
-                  key={r.value}
-                  name={r.value <= rating.value ? 'star' : 'star-border'}
-                  size={48}
-                  color={Colors.$backgroundPrimaryHeavy}
-                  onPress={() => setRating(r)}
-                />
-              ))}
-            </View>
-          </View>
-          <GridList
-            style={{ marginTop: 20 }}
-            listPadding={20}
-            data={feedbackCategoryOptions}
-            numColumns={2}
-            renderItem={(category) => (
-              <Chip
-                borderRadius={10}
-                center
-                br40
-                labelStyle={
-                  selectedCategories.includes(category.item)
-                    ? {
-                        color: Colors.$backgroundPrimaryHeavy,
-                        fontFamily: 'NotoSansThaiBold',
-                        padding: 10
-                      }
-                    : {
-                        color: Colors.grey30,
-                        fontFamily: 'NotoSansThaiBold',
-                        padding: 10
-                      }
-                }
-                style={
-                  selectedCategories.includes(category.item)
-                    ? {
-                        borderWidth: 1,
-                        backgroundColor: Colors.$backgroundPrimaryLight,
-                        borderColor: Colors.$backgroundPrimaryHeavy
-                      }
-                    : {
-                        borderWidth: 1,
-                        backgroundColor: Colors.white,
-                        borderColor: Colors.grey50
-                      }
-                }
-                label={category.item.label}
-                size={{ width: 100, height: 40 }}
-                onPress={() => handleSelectCategory(category.item)}
-              />
-            )}
-          />
-        </View>
-        <View paddingH-20 paddingT-25>
-          <Button
-            secondary
-            label="ตกลง"
-            style={{ borderRadius: 10 }}
-            disabled={isPending}
-            onPress={() =>
-              submitFeedback({
-                driveRequestId: driveRequest.id,
-                category: selectedCategories.map(
-                  (c) => c.value
-                ) as FeedbackCategory[],
-                rating: rating.value
-              })
-            }
-          />
-        </View>
+        <FlatList
+          contentContainerStyle={styles.feedbackList}
+          keyExtractor={(category) => category.value}
+          data={feedbackCategoryOptions}
+          renderItem={({ item: category }) => (
+            <FeedbackCategoryListItem
+              item={category}
+              value={feedbacks[category.value]}
+              onRatingChange={handleRatingChange}
+            />
+          )}
+        />
+        <Button
+          secondary
+          label="ตกลง"
+          br10
+          disabled={isPending}
+          onPress={handleSubmitFeedback}
+        />
       </SafeAreaView>
     </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 30, backgroundColor: Colors.white },
+  backButton: {
+    position: 'absolute',
+    left: 5,
+    borderWidth: 1,
+    padding: 7,
+    borderColor: 'gray'
+  },
+  feedbackList: {
+    flex: 1,
+    justifyContent: 'center'
+  }
+})
