@@ -1,7 +1,7 @@
 import axiosInstance from '@/libs/axios'
 import { CreateUser, User, UserIdentificationType } from './type'
 import { Paginate, PaginateParams } from '../shared/type'
-import { DriveRequest } from '@/sockets/drive-request/type'
+import { DriveRequest, DriveRequestDetail } from '@/sockets/drive-request/type'
 
 class UsersApi {
   async getUserBy(
@@ -31,7 +31,7 @@ class UsersApi {
 
   async getMyDriveRequestById(id: string) {
     return axiosInstance
-      .get<DriveRequest>(`/users/me/drive-requests/${id}`)
+      .get<DriveRequestDetail>(`/users/me/drive-requests/${id}`)
       .then((res) => res.data)
   }
 }

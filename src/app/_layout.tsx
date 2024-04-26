@@ -1,6 +1,6 @@
 import { useFonts } from 'expo-font'
 import { Slot, SplashScreen } from 'expo-router'
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { DesignSystem } from '@/utils/design-system'
 import Toast from 'react-native-toast-message'
 import { toastConfig } from '@/libs/toasts'
@@ -22,12 +22,6 @@ function RootLayout() {
     NotoSansThaiBold: require('../../assets/fonts/NotoSansThai-Bold.ttf')
   })
 
-  const onLayoutRootView = useCallback(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync()
-    }
-  }, [fontsLoaded])
-
   useEffect(() => {
     if (error) {
       throw error
@@ -39,7 +33,7 @@ function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onLayoutRootView}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProviders>
         <Slot />
       </AppProviders>

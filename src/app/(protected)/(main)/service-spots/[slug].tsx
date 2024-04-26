@@ -2,13 +2,13 @@ import { Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Alert, Linking, StyleSheet, ScrollView } from 'react-native'
 import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
-import MapView, { MapMarker, Marker } from 'react-native-maps'
+import MapView, { Marker } from 'react-native-maps'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 import ImageViewerModal from '@/components/ImageViewerModal'
 import CardModal from '@/components/CardModal'
-import CustomMarkerImage from '@/components/map/CustomMarkerImage'
+import ServiceSpotMarker from '@/components/service-spots/ServiceSpotMarker'
 
 type Params = {
   slug: string
@@ -127,16 +127,13 @@ function ServiceSpotDetail() {
                 showsMyLocationButton={false}
                 toolbarEnabled={false}
               >
-                <Marker
+                <ServiceSpotMarker
                   key={serviceSpot?.id}
                   coordinate={{
                     latitude: serviceSpot.coords.lat || 0,
                     longitude: serviceSpot.coords.lng || 0
                   }}
-                  tracksViewChanges={false}
-                >
-                  <CustomMarkerImage color="orange" />
-                </Marker>
+                />
               </MapView>
               <View paddingH-15 paddingV-5 paddingT-10>
                 <View row paddingV-5>

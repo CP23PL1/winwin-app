@@ -7,7 +7,6 @@ import {
   useState
 } from 'react'
 import { useLocation } from '@/hooks/useLocation'
-import { GeoPosition } from 'react-native-geolocation-service'
 import Toast from 'react-native-toast-message'
 import { router } from 'expo-router'
 import { DriveRequest, RequestDrive } from '@/sockets/drive-request/type'
@@ -18,19 +17,22 @@ import {
 } from '@/apis/drive-requests/types'
 import { LatLng } from 'react-native-maps'
 import { mapUtil } from '@/utils/map'
+import { LocationObject } from 'expo-location'
 
 type Props = {
   readonly children: React.ReactNode
 }
 
 type DriveRequestContextT = {
-  location: GeoPosition | null
+  location: LocationObject | null
   points: LatLng[]
   route: DriveRequestPreviewResponse | null
   origin: Waypoint | null
   destination: Waypoint | null
   driveRequest: DriveRequest | null
   isRequesting: boolean
+  hasNewChatMessage: boolean
+  setHasNewChatMessage: (hasNewMessage: boolean) => void
   setOrigin: (origin: Waypoint) => void
   setDestination: (destination: Waypoint) => void
   setRoute: (route: DriveRequestPreviewResponse) => void
@@ -49,6 +51,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
   const [destination, setDestination] = useState<Waypoint | null>(null)
   const [driveRequest, setDriveRequest] = useState<DriveRequest | null>(null)
   const [isRequesting, setIsRequesting] = useState(false)
+  const [hasNewChatMessage, setHasNewChatMessage] = useState(false)
 
   const points = useMemo(() => {
     if (!route) return []
@@ -126,37 +129,6 @@ export default function DriveRequestContextProvider({ children }: Props) {
     [reset]
   )
 
-  const value = useMemo(
-    () => ({
-      points,
-      isRequesting,
-      location,
-      route,
-      origin,
-      destination,
-      driveRequest,
-      setOrigin,
-      setDestination,
-      setRoute,
-      requestDrive,
-      reset
-    }),
-    [
-      points,
-      isRequesting,
-      location,
-      route,
-      origin,
-      destination,
-      driveRequest,
-      setOrigin,
-      setDestination,
-      setRoute,
-      requestDrive,
-      reset
-    ]
-  )
-
   // Handle socket io events on mount with cleanup
   useEffect(() => {
     driveRequestSocket.on('drive-request-created', handleDriveRequestCreated)
@@ -200,7 +172,24 @@ export default function DriveRequestContextProvider({ children }: Props) {
   }, [])
 
   return (
-    <DriveRequestContext.Provider value={value}>
+    <DriveRequestContext.Provider
+      value={{
+        points,
+        isRequesting,
+        location,
+        route,
+        origin,
+        destination,
+        driveRequest,
+        hasNewChatMessage,
+        setHasNewChatMessage,
+        setOrigin,
+        setDestination,
+        setRoute,
+        requestDrive,
+        reset
+      }}
+    >
       {children}
     </DriveRequestContext.Provider>
   )

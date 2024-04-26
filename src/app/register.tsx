@@ -12,9 +12,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Alert } from 'react-native'
 
 const validationSchema = yup.object().shape({
-  email: yup.string().email().required(),
-  firstName: yup.string().required(),
-  lastName: yup.string().required()
+  email: yup.string().email().trim().required(),
+  firstName: yup.string().trim().required(),
+  lastName: yup.string().trim().required()
 })
 
 export default function RegisterScreen() {

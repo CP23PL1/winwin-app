@@ -41,7 +41,29 @@ export type DriveRequest = {
       encodedPolyline: string
     }
   }
-  paidAmount: number
+  total: number
+  serviceCharge: number
+  priceByDistance: number
   status: DriveRequestSessionStatus
+  createdAt: string
+}
+
+export type DriveRequestDetail = {
+  id: string
+  userId: string
+  driverId: string
+  user: User
+  driver: Driver
+  origin: Waypoint
+  destination: Waypoint
+  route?: {
+    duration: string
+    distanceMeters: number
+    polyline: {
+      encodedPolyline: string
+    }
+  }
+  paidAmount: number
+  status: DriveRequestStatus
   createdAt: string
 }

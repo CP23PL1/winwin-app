@@ -23,7 +23,7 @@ const config: ExpoConfig = {
     package: 'com.cp23pl1.winwin',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#FDA84B'
+      backgroundColor: '#F5A256'
     },
     permissions: ['android.permission.ACCESS_FINE_LOCATION'],
     config: {

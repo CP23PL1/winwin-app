@@ -4,12 +4,12 @@ import { FontAwesome5 } from '@expo/vector-icons'
 import { GooglePlaceData } from 'react-native-google-places-autocomplete'
 import { StyleSheet } from 'react-native'
 import PlaceAutocompleteModal from './PlaceAutocompleteModal'
-import { GeoPosition } from 'react-native-geolocation-service'
 import { MaskedPlaceDetail } from '@/apis/google/type'
 import { Waypoint } from '@/apis/drive-requests/types'
+import { LocationObject } from 'expo-location'
 
 type Props = {
-  currentLocation?: GeoPosition | null
+  currentLocation?: LocationObject | null
   origin: Waypoint | null
   destination: Waypoint | null
   onOriginChange: (origin: Waypoint) => void
@@ -25,7 +25,7 @@ export default function RouteCard({
 }: Props) {
   const [currentWaypoint, setCurrentWaypoint] = useState<
     'origin' | 'destination'
-  >('origin')
+  >()
   const [openPlaceAutocompleteModal, setOpenPlaceAutocompleteModal] =
     useState(false)
 
@@ -114,6 +114,7 @@ export default function RouteCard({
       <PlaceAutocompleteModal
         location={currentLocation}
         visible={openPlaceAutocompleteModal}
+        predefinedCurrentLocation={currentWaypoint === 'origin'}
         onRequestClose={() => setOpenPlaceAutocompleteModal(false)}
         onSelectPlace={handlePlaceSelected}
       />

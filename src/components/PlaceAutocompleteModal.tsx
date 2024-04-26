@@ -5,16 +5,18 @@ import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete'
-import { Colors, Modal, ModalProps, View, Text } from 'react-native-ui-lib'
-import { FontAwesome5, Feather } from '@expo/vector-icons'
+import { Colors, Modal, ModalProps, Text, View } from 'react-native-ui-lib'
+import { FontAwesome5, Feather, MaterialIcons } from '@expo/vector-icons'
 import uuid from 'react-native-uuid'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { GeoPosition } from 'react-native-geolocation-service'
 import { MaskedPlaceDetail } from '@/apis/google/type'
+import { MAX_DISTANCE_METERS } from '@/constants/service-spots'
+import { LocationObject } from 'expo-location'
 
 type Props = ModalProps & {
-  location?: GeoPosition | null
+  location?: LocationObject | null
   fields?: string
+  predefinedCurrentLocation?: boolean
   onSelectPlace: (
     data: GooglePlaceData,
     detail: MaskedPlaceDetail | null
@@ -23,12 +25,14 @@ type Props = ModalProps & {
 
 export default function PlaceAutocompleteModal({
   location,
+  predefinedCurrentLocation,
   onSelectPlace,
   fields = 'geometry,name,place_id',
   ...props
 }: Props) {
   const [autocompleteSessionToken, setAutocompleteSessionToken] =
     useState<string>(uuid.v4().toString())
+  const [predefinedPlaces, setPredefinedPlaces] = useState<any>([])
 
   const handleSelectPlace = useCallback(
     (data: GooglePlaceData, detail: MaskedPlaceDetail | null) => {
@@ -49,6 +53,28 @@ export default function PlaceAutocompleteModal({
     return () => clearTimeout(timeout)
   }, [ref.current, props.visible])
 
+  useEffect(() => {
+    if (!location || !predefinedCurrentLocation) return
+    setPredefinedPlaces([
+      {
+        structured_formatting: {
+          main_text: 'ตำแหน่งปัจจุบัน',
+          secondary_text: 'เลือกตำแหน่งปัจจุบัน'
+        },
+        description: 'ตำแหน่งปัจจุบัน',
+        icon: (
+          <MaterialIcons name="my-location" size={20} color={Colors.blue40} />
+        ),
+        geometry: {
+          location: {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude
+          }
+        }
+      }
+    ])
+  }, [location, predefinedCurrentLocation])
+
   return (
     <Modal {...props} animationType="slide" statusBarTranslucent>
       <SafeAreaView style={{ height: '100%' }}>
@@ -64,13 +90,20 @@ export default function PlaceAutocompleteModal({
           }}
           fetchDetails
           renderLeftButton={() => <Feather name="search" size={20} />}
-          renderRow={(data) => (
+          predefinedPlaces={predefinedPlaces}
+          predefinedPlacesAlwaysVisible
+          renderRow={(data: any) => (
             <View row gap-12>
-              <FontAwesome5
-                name="map-marker-alt"
-                size={20}
-                color={Colors.red40}
-              />
+              {data.icon ? (
+                data.icon
+              ) : (
+                <FontAwesome5
+                  name="map-marker-alt"
+                  size={20}
+                  color={Colors.red40}
+                />
+              )}
+
               <View>
                 <Text>{data.structured_formatting.main_text}</Text>
                 <Text style={{ fontSize: 12 }}>
@@ -91,7 +124,7 @@ export default function PlaceAutocompleteModal({
             location: location
               ? `${location.coords.latitude},${location.coords.longitude}`
               : undefined,
-            radius: 10000,
+            radius: MAX_DISTANCE_METERS,
             sessiontoken: autocompleteSessionToken
           }}
           onFail={(error) => console.error(error)}

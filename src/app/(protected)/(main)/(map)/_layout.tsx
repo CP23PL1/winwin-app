@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Drawer } from 'expo-router/drawer'
 import { useCallback } from 'react'
 import { useAuth0 } from 'react-native-auth0'
-import { LoaderScreen } from 'react-native-ui-lib'
+import { Colors, LoaderScreen } from 'react-native-ui-lib'
 
 export default function MapLayout() {
   const queryClient = useQueryClient()
@@ -29,6 +29,7 @@ export default function MapLayout() {
       screenOptions={{
         headerTransparent: true,
         drawerStatusBarAnimation: 'fade',
+        headerTitleAlign: 'center',
         headerTitleStyle: { display: 'none' },
         drawerLabelStyle: {
           fontFamily: 'NotoSansThai'

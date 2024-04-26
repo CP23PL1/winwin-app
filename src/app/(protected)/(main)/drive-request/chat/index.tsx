@@ -9,7 +9,7 @@ import ChatHeader from '@/components/chat/ChatHeader'
 import ChatMessageList from '@/components/chat/ChatMessageList'
 
 export default function DriveRequestChat() {
-  const { driveRequest } = useDriveRequestContext()
+  const { driveRequest, setHasNewChatMessage } = useDriveRequestContext()
   const [text, onChangeText] = useState('')
   const [messages, setChatMessages] = useState<ChatMessage[]>([])
 
@@ -39,6 +39,7 @@ export default function DriveRequestChat() {
 
   const handleChatMessageReceived = useCallback((data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data])
+    setHasNewChatMessage(true)
   }, [])
 
   useEffect(() => {

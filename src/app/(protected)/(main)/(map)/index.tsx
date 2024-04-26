@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, {
-  Callout,
   Details,
   MapMarker,
   Marker,
@@ -8,14 +7,13 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
-import { Pressable, StyleSheet } from 'react-native'
-import { router } from 'expo-router'
-import { useQuery } from '@tanstack/react-query'
+import { Colors, View } from 'react-native-ui-lib'
+import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
+import { SplashScreen, router } from 'expo-router'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
-import { NEARBY_RADIUS } from '@/constants/service-spots'
+import { MAX_DISTANCE_METERS, NEARBY_RADIUS } from '@/constants/service-spots'
 import debounce from 'lodash.debounce'
-import ServiceSpotCallout from '@/components/service-spots/ServiceSpotCallout'
 import { isAxiosError } from 'axios'
 import { mapUtil } from '@/utils/map'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
@@ -25,46 +23,71 @@ import RouteCard from '@/components/RouteCard'
 import { Waypoint } from '@/apis/drive-requests/types'
 import DriveRequestPreviewSheet from '@/components/drive-requests/DriveRequestPreviewSheet'
 import DriveRequestDetailSheet from '@/components/drive-requests/DriveRequestDetailSheet'
-import CustomMarkerImage from '@/components/map/CustomMarkerImage'
 import { MaterialIcons } from '@expo/vector-icons'
+import ServiceSpotMarker from '@/components/service-spots/ServiceSpotMarker'
+import MapSettingMenu from '@/components/map/MapSettingMenu'
 
 export default function MainScreen() {
   const {
     isRequesting,
-    requestDrive,
     driveRequest,
     points,
     location,
     route,
     origin,
     destination,
+    hasNewChatMessage,
+    setHasNewChatMessage,
+    requestDrive,
     setRoute,
     setOrigin,
-    setDestination
+    setDestination,
+    reset
   } = useDriveRequestContext()
+  const queryClient = useQueryClient()
   const map = useRef<MapView | null>(null)
   const originMarker = useRef<MapMarker | null>(null)
   const destinationMarker = useRef<MapMarker | null>(null)
-
   const [initialRegion, setInitialRegion] = useState<Region | null>(null)
-
-  const { data: serviceSpots, refetch: refetchNearbyServiceSpots } = useQuery({
-    queryKey: ['service-spots'],
+  const [showServiceSpotMarkers, setShowServiceSpotMarkers] = useState(true)
+  const { data: originServiceSpots } = useQuery({
+    queryKey: ['origin-service-spots'],
     queryFn: () =>
       serviceSpotsApi.getNearbyServiceSpots({
-        lat: destination?.location.lat ?? location?.coords.latitude,
-        lng: destination?.location.lng ?? location?.coords.longitude,
+        lat: origin?.location.lat,
+        lng: origin?.location.lng,
         radius: NEARBY_RADIUS
       }),
-    enabled: destination !== null || location !== null
+    enabled: origin !== null
   })
+
+  const { data: destinationServiceSpots } = useQuery({
+    queryKey: ['destination-service-spots'],
+    queryFn: () =>
+      serviceSpotsApi.getNearbyServiceSpots({
+        lat: destination?.location.lat,
+        lng: destination?.location.lng,
+        radius: NEARBY_RADIUS
+      }),
+    enabled: destination !== null
+  })
+
+  const serviceSpots = useMemo(() => {
+    let _originServiceSpots = originServiceSpots || []
+    let _destinationServiceSpots = destinationServiceSpots || []
+    console.log('update service spots')
+    return [..._originServiceSpots, ..._destinationServiceSpots]
+  }, [originServiceSpots, destinationServiceSpots])
 
   const handleRegionChangeComplete = useCallback(
     debounce((_, details: Details) => {
       if (details.isGesture) return
-      refetchNearbyServiceSpots()
+      queryClient.invalidateQueries({
+        queryKey: ['origin-service-spots', 'destination-service-spots'],
+        type: 'all'
+      })
     }, 500),
-    [refetchNearbyServiceSpots]
+    []
   )
 
   const fetchRoutes = useCallback(
@@ -94,16 +117,25 @@ export default function MainScreen() {
         }
       }
     },
-    [map.current, originMarker.current, destinationMarker.current, setRoute]
+    [map.current, originMarker.current, destinationMarker.current]
   )
 
-  const moveToMarker = useCallback(
-    (identifier: string) => {
-      if (!map.current) return
-      map.current.fitToSuppliedMarkers([identifier])
-    },
-    [map.current]
-  )
+  const handlePhonePressed = useCallback(() => {
+    if (!driveRequest?.driver.phoneNumber) {
+      throw new Error('Driver phone number is not available')
+    }
+    Linking.openURL(`tel:${driveRequest?.driver.phoneNumber}`)
+  }, [driveRequest?.driver.phoneNumber])
+
+  const handleChatBubblePressed = useCallback(() => {
+    router.push('/drive-request/chat')
+    setHasNewChatMessage(false)
+  }, [])
+
+  const handleDriveRequestPreviewCancel = useCallback(() => {
+    reset()
+    setShowServiceSpotMarkers(true)
+  }, [])
 
   useEffect(() => {
     if (!origin || !destination) return
@@ -138,42 +170,53 @@ export default function MainScreen() {
         1000
       )
     }
-  }, [
-    location,
-    initialRegion,
-    origin,
-    map.current,
-    setOrigin,
-    setInitialRegion
-  ])
+  }, [map.current, location, initialRegion, origin])
 
-  return !initialRegion ? (
-    <LoaderScreen />
-  ) : (
+  if (!initialRegion) return null
+
+  return (
     <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
       <MapView
         ref={map}
         maxZoomLevel={16}
         style={StyleSheet.absoluteFill}
         initialRegion={initialRegion}
-        onRegionChangeComplete={handleRegionChangeComplete}
         provider={PROVIDER_GOOGLE}
-        showsMyLocationButton={false}
         showsUserLocation={!route}
+        showsMyLocationButton={false}
         toolbarEnabled={false}
         showsCompass={false}
+        onRegionChangeComplete={handleRegionChangeComplete}
+        onMapLoaded={SplashScreen.hideAsync}
       >
+        {!driveRequest &&
+          serviceSpots?.map((serviceSpot) => (
+            <ServiceSpotMarker
+              data={serviceSpot}
+              identifier={serviceSpot.id.toString()}
+              key={serviceSpot.id}
+              onPress={() =>
+                map.current?.fitToSuppliedMarkers([serviceSpot.id.toString()])
+              }
+              coordinate={{
+                latitude: serviceSpot.coords.lat,
+                longitude: serviceSpot.coords.lng
+              }}
+              visibility={showServiceSpotMarkers}
+              zIndex={10}
+            />
+          ))}
         {destination && (
           <Marker
+            zIndex={20}
             ref={destinationMarker}
-            tracksViewChanges={false}
             coordinate={{
               latitude: destination.location.lat,
               longitude: destination.location.lng
             }}
-          >
-            <CustomMarkerImage color="red" />
-          </Marker>
+            tracksViewChanges={false}
+            icon={require('../../../../../assets/map_marker_red.png')}
+          />
         )}
         {points.length > 0 && (
           <Polyline
@@ -184,57 +227,25 @@ export default function MainScreen() {
         )}
         {route && origin && (
           <Marker
+            zIndex={20}
             ref={originMarker}
-            tracksViewChanges={false}
             coordinate={{
               latitude: origin.location.lat,
               longitude: origin.location.lng
             }}
-          >
-            <CustomMarkerImage color="blue" />
-          </Marker>
+            tracksViewChanges={false}
+            icon={require('../../../../../assets/map_marker_blue.png')}
+          />
         )}
-        {!driveRequest &&
-          serviceSpots?.map((serviceSpot) => (
-            <Marker
-              identifier={serviceSpot.id.toString()}
-              key={serviceSpot.id}
-              onPress={() => moveToMarker(serviceSpot.id.toString())}
-              tracksViewChanges={false}
-              coordinate={{
-                latitude: serviceSpot.coords.lat,
-                longitude: serviceSpot.coords.lng
-              }}
-              stopPropagation
-            >
-              <CustomMarkerImage color="orange" size={52} />
-              <Callout
-                tooltip
-                onPress={() => router.push(`/service-spots/${serviceSpot.id}`)}
-              >
-                <ServiceSpotCallout serviceSpot={serviceSpot} />
-              </Callout>
-            </Marker>
-          ))}
       </MapView>
       {!driveRequest && !route && (
         <Pressable
-          style={{
-            position: 'absolute',
-            bottom: 40,
-            right: 25,
-            justifyContent: 'center',
-            elevation: 8,
-            backgroundColor: 'white',
-            borderRadius: 50,
-            padding: 10
-          }}
+          style={styles.currentLocationButton}
           onPress={() => map.current?.animateToRegion(initialRegion, 1000)}
         >
           <MaterialIcons name="my-location" size={24} color={Colors.blue40} />
         </Pressable>
       )}
-
       {!driveRequest && (
         <View center>
           <RouteCard
@@ -247,19 +258,46 @@ export default function MainScreen() {
         </View>
       )}
       {route && !driveRequest && (
-        <DriveRequestPreviewSheet
-          route={route}
-          requestDrive={requestDrive}
-          isRequesting={isRequesting}
-        />
+        <>
+          <DriveRequestPreviewSheet
+            route={route}
+            requestDrive={requestDrive}
+            isRequesting={isRequesting}
+            maxDistanceMeters={MAX_DISTANCE_METERS}
+            onCancel={handleDriveRequestPreviewCancel}
+          />
+          <MapSettingMenu
+            style={styles.mapSettingMenu}
+            onToggleMapMarker={setShowServiceSpotMarkers}
+          />
+        </>
       )}
       {driveRequest && (
         <DriveRequestDetailSheet
           driveRequest={driveRequest}
-          hasNewMessageReceived={false}
-          onChatBubblePressed={() => router.push('/drive-request/chat')}
+          hasNewMessageReceived={hasNewChatMessage}
+          onChatBubblePressed={handleChatBubblePressed}
+          onPhonePressed={handlePhonePressed}
         />
       )}
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  currentLocationButton: {
+    position: 'absolute',
+    bottom: 40,
+    right: 25,
+    justifyContent: 'center',
+    elevation: 2,
+    backgroundColor: 'white',
+    borderRadius: 50,
+    padding: 10
+  },
+  mapSettingMenu: {
+    position: 'absolute',
+    top: Dimensions.get('screen').height / 3,
+    right: 10
+  }
+})

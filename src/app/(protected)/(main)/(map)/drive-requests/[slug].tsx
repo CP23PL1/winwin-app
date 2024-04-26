@@ -1,24 +1,17 @@
 import { usersApi } from '@/apis/users'
 import Waypoint from '@/components/Waypoint'
 import DriverInfo from '@/components/drive-requests/DriverInfo'
-import CustomMarkerImage from '@/components/map/CustomMarkerImage'
-import { DriveRequest } from '@/sockets/drive-request/type'
+import { DriveRequestDetail } from '@/sockets/drive-request/type'
 import { commonUtil } from '@/utils/common'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import moment from 'moment'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MapView, { Marker } from 'react-native-maps'
-import {
-  Avatar,
-  Card,
-  Colors,
-  SkeletonView,
-  Text,
-  View
-} from 'react-native-ui-lib'
+import { Card, Colors, SkeletonView, Text, View } from 'react-native-ui-lib'
 
 export default function DriveRequestDetailScreen() {
+  const [trackViewChange, setTrackViewChange] = useState(true)
   const map = useRef<MapView | null>(null)
   const { slug } = useLocalSearchParams()
 
@@ -30,9 +23,7 @@ export default function DriveRequestDetailScreen() {
 
   useEffect(() => {
     if (!map.current) return
-    map.current?.fitToSuppliedMarkers(['origin', 'destination'], {
-      edgePadding: { top: 100, right: 100, bottom: 100, left: 100 }
-    })
+    map.current?.fitToSuppliedMarkers(['origin', 'destination'])
   }, [map.current])
 
   return (
@@ -47,7 +38,7 @@ export default function DriveRequestDetailScreen() {
       template={SkeletonView.templates.TEXT_CONTENT}
       showContent={!!driveRequest}
       customValue={driveRequest}
-      renderContent={(driveRequest: DriveRequest) => (
+      renderContent={(driveRequest: DriveRequestDetail) => (
         <View padding-20 gap-10>
           <MapView
             ref={map}
@@ -55,9 +46,10 @@ export default function DriveRequestDetailScreen() {
             initialRegion={{
               latitude: driveRequest.origin.location.lat,
               longitude: driveRequest.origin.location.lng,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01
             }}
+            onMapLoaded={() => setTrackViewChange(false)}
           >
             <Marker
               identifier="origin"
@@ -65,18 +57,18 @@ export default function DriveRequestDetailScreen() {
                 latitude: driveRequest.origin.location.lat,
                 longitude: driveRequest.origin.location.lng
               }}
-            >
-              <CustomMarkerImage color="blue" />
-            </Marker>
+              icon={require('../../../../../../assets/map_marker_blue.png')}
+              tracksViewChanges={trackViewChange}
+            />
             <Marker
               identifier="destination"
               coordinate={{
                 latitude: driveRequest.destination.location.lat,
                 longitude: driveRequest.destination.location.lng
               }}
-            >
-              <CustomMarkerImage color="red" />
-            </Marker>
+              icon={require('../../../../../../assets/map_marker_red.png')}
+              tracksViewChanges={trackViewChange}
+            />
           </MapView>
           <Card gap-10 padding-10>
             <Waypoint
