@@ -123,10 +123,18 @@ export default function DriveRequestContextProvider({ children }: Props) {
 
   const handleException = useCallback(
     (error: any) => {
+      let message = error?.message ?? 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+
+      if (error.message === 'NO_DRIVER_AVAILABLE') {
+        message = 'ขออภัย ไม่มีวินมอเตอร์ไซค์รับจ้างให้บริการในขณะนี้'
+      } else if (error.message === 'NO_NEARBY_SERVICE_SPOT') {
+        message = 'ไม่พบจุดบริการใกล้เคียง'
+      }
+
       Toast.show({
         type: 'error',
         text1: 'เกิดข้อผิดพลาด',
-        text2: error?.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+        text2: message
       })
       setIsRequesting(false)
     },

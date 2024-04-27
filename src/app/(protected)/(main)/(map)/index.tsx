@@ -9,7 +9,7 @@ import MapView, {
 } from 'react-native-maps'
 import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
 import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
-import { SplashScreen, router } from 'expo-router'
+import { router } from 'expo-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
 import { MAX_DISTANCE_METERS, NEARBY_RADIUS } from '@/constants/service-spots'
@@ -75,8 +75,8 @@ export default function MainScreen() {
   const serviceSpots = useMemo(() => {
     let _originServiceSpots = originServiceSpots || []
     let _destinationServiceSpots = destinationServiceSpots || []
-    console.log('update service spots')
-    return [..._originServiceSpots, ..._destinationServiceSpots]
+    const merged = _originServiceSpots.concat(_destinationServiceSpots)
+    return [...new Map(merged.map((item) => [item.id, item])).values()]
   }, [originServiceSpots, destinationServiceSpots])
 
   const handleRegionChangeComplete = useCallback(
@@ -202,6 +202,7 @@ export default function MainScreen() {
                 longitude: serviceSpot.coords.lng
               }}
               visibility={showServiceSpotMarkers}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
               zIndex={10}
             />
           ))}

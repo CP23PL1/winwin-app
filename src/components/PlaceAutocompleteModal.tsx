@@ -73,6 +73,10 @@ export default function PlaceAutocompleteModal({
         }
       }
     ])
+
+    return () => {
+      setPredefinedPlaces([])
+    }
   }, [location, predefinedCurrentLocation])
 
   return (

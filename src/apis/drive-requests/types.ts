@@ -16,6 +16,7 @@ export type DriveRequestPreviewResponse = {
 export type Waypoint = {
   name: string
   location: Coordinate
+  placeId?: string
 }
 
 export type CreateFeedback = {

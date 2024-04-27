@@ -1,7 +1,15 @@
 import { Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Alert, Linking, StyleSheet, ScrollView } from 'react-native'
-import { View, Text, LoaderScreen, Button, Image } from 'react-native-ui-lib'
+import {
+  View,
+  Text,
+  LoaderScreen,
+  Button,
+  Image,
+  Colors,
+  Avatar
+} from 'react-native-ui-lib'
 import MapView, { Marker } from 'react-native-maps'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
@@ -9,6 +17,7 @@ import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
 import ImageViewerModal from '@/components/ImageViewerModal'
 import CardModal from '@/components/CardModal'
 import ServiceSpotMarker from '@/components/service-spots/ServiceSpotMarker'
+import DriverInfo from '@/components/drive-requests/DriverInfo'
 
 type Params = {
   slug: string
@@ -84,6 +93,28 @@ function ServiceSpotDetail() {
                 style={{ height: 150, width: 150 }}
                 src={serviceSpot.serviceSpotOwner.info.profileImage}
               />
+              {serviceSpot.serviceSpotOwner.info.profileImage !== null ? (
+                <Avatar
+                  source={{
+                    uri: serviceSpot.serviceSpotOwner.info.profileImage
+                  }}
+                  size={52}
+                />
+              ) : (
+                <View
+                  backgroundColor={Colors.$backgroundPrimaryMedium}
+                  br100
+                  center
+                  width={52}
+                  height={52}
+                >
+                  <FontAwesome5
+                    name="user-alt"
+                    size={22}
+                    color={Colors.$iconPrimary}
+                  />
+                </View>
+              )}
             </View>
             <View paddingV-10 center>
               <Text h4B white>
@@ -195,25 +226,7 @@ function ServiceSpotDetail() {
                       avoidInnerPadding
                       onPress={() => showWinWinCard()}
                     >
-                      <View>
-                        <Image
-                          borderRadius={25}
-                          height={50}
-                          width={50}
-                          source={{
-                            uri: serviceSpot.serviceSpotOwner.info.profileImage
-                          }}
-                        />
-                      </View>
-                      <View paddingL-10>
-                        <Text bodyB>
-                          {serviceSpot.serviceSpotOwner.info.firstName}{' '}
-                          {serviceSpot.serviceSpotOwner.info.lastName}
-                        </Text>
-                        <Text>
-                          วินหมายเลข {serviceSpot.serviceSpotOwner.info.no}
-                        </Text>
-                      </View>
+                      <DriverInfo driver={serviceSpot.serviceSpotOwner.info} />
                     </Button>
                   </View>
                 </View>

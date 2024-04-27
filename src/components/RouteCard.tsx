@@ -7,6 +7,7 @@ import PlaceAutocompleteModal from './PlaceAutocompleteModal'
 import { MaskedPlaceDetail } from '@/apis/google/type'
 import { Waypoint } from '@/apis/drive-requests/types'
 import { LocationObject } from 'expo-location'
+import Toast from 'react-native-toast-message'
 
 type Props = {
   currentLocation?: LocationObject | null
@@ -39,23 +40,37 @@ export default function RouteCard({
     setCurrentWaypoint(waypoint)
     setOpenPlaceAutocompleteModal(true)
   }
+
   const handlePlaceSelected = useCallback(
     (data: GooglePlaceData, detail: MaskedPlaceDetail | null) => {
       setOpenPlaceAutocompleteModal(false)
       if (!detail) return
+
+      if ([origin?.placeId, destination?.placeId].includes(detail.place_id)) {
+        Toast.show({
+          type: 'error',
+          text1: 'เกิดข้อผิดพลาด',
+          text2:
+            'คุณไม่สามารถเลือกสถานที่เดิมซ้ำได้ กรุณาเลือกสถานที่ใหม่อีกครั้ง'
+        })
+        return
+      }
+
       if (currentWaypoint === 'origin') {
         onOriginChange({
           name: data.description,
-          location: detail.geometry.location
+          location: detail.geometry.location,
+          placeId: detail.place_id
         })
       } else {
         onDestinationChange({
           name: data.description,
-          location: detail.geometry.location
+          location: detail.geometry.location,
+          placeId: detail.place_id
         })
       }
     },
-    [currentWaypoint, onOriginChange, onDestinationChange]
+    [origin, destination, currentWaypoint, onOriginChange, onDestinationChange]
   )
 
   return (

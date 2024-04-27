@@ -6,7 +6,7 @@ import {
   Button
 } from 'react-native-ui-lib'
 import { Ionicons } from '@expo/vector-icons'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { Redirect, Stack, router } from 'expo-router'
@@ -32,6 +32,11 @@ export default function FeedbackScreen() {
       }),
       {} as FeedbackMap
     )
+  )
+
+  const isAllFeedbacksRated = useMemo(
+    () => Object.values(feedbacks).every((value) => value > 0),
+    [feedbacks]
   )
 
   const handleSuccess = useCallback(() => {
@@ -99,7 +104,7 @@ export default function FeedbackScreen() {
           secondary
           label="ตกลง"
           br10
-          disabled={isPending}
+          disabled={isPending || !isAllFeedbacksRated}
           onPress={handleSubmitFeedback}
         />
       </SafeAreaView>
