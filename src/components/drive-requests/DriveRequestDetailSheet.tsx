@@ -5,11 +5,12 @@ import {
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet'
 import moment from 'moment'
 import React from 'react'
-import { Colors, View, Text, Avatar } from 'react-native-ui-lib'
+import { Colors, View, Text } from 'react-native-ui-lib'
 import Waypoint from '../Waypoint'
 import { StyleSheet } from 'react-native'
 import { Ionicons, SimpleLineIcons } from '@expo/vector-icons'
 import { commonUtil } from '@/utils/common'
+import DriverInfo from './DriverInfo'
 
 type Props = {
   driveRequest: DriveRequest
@@ -87,16 +88,7 @@ export default function DriveRequestDetailSheet({
           </View>
 
           <View row spread centerV>
-            <View row centerV gap-10>
-              <Avatar source={{ uri: driveRequest.driver.info.profileImage }} />
-              <View>
-                <Text bodyB>
-                  {driveRequest.driver.info.firstName}{' '}
-                  {driveRequest.driver.info.lastName}
-                </Text>
-                <Text caption>วินหมายเลข {driveRequest.driver.info.no}</Text>
-              </View>
-            </View>
+            <DriverInfo driver={driveRequest.driver.info} />
             <View row center gap-15>
               <SimpleLineIcons
                 name="phone"

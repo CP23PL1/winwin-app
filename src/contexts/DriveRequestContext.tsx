@@ -117,6 +117,10 @@ export default function DriveRequestContextProvider({ children }: Props) {
     router.replace('/drive-request/feedback')
   }, [])
 
+  const handleChatMessageReceived = useCallback(() => {
+    setHasNewChatMessage(true)
+  }, [])
+
   const handleException = useCallback(
     (error: any) => {
       Toast.show({
@@ -138,6 +142,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
       'drive-request-completed',
       handleDriveRequestCompleted
     )
+    driveRequestSocket.on('chat-message-received', handleChatMessageReceived)
     driveRequestSocket.on('exception', handleException)
 
     return () => {
@@ -151,6 +156,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
         'drive-request-completed',
         handleDriveRequestCompleted
       )
+      driveRequestSocket.off('chat-message-received', handleChatMessageReceived)
       driveRequestSocket.off('exception', handleException)
     }
   }, [

@@ -107,7 +107,7 @@ export default function DriveRequestDetailScreen() {
             <Text h5B marginB-10>
               ข้อมูลผู้ขับ
             </Text>
-            <DriverInfo driver={driveRequest.driver} />
+            <DriverInfo driver={driveRequest.driver.info} />
           </Card>
         </View>
       )}
