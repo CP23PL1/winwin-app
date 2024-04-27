@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Drawer } from 'expo-router/drawer'
 import { useCallback } from 'react'
 import { useAuth0 } from 'react-native-auth0'
-import { Colors, LoaderScreen } from 'react-native-ui-lib'
+import { LoaderScreen } from 'react-native-ui-lib'
 
 export default function MapLayout() {
   const queryClient = useQueryClient()

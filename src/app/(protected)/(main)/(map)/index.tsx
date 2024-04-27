@@ -7,7 +7,7 @@ import MapView, {
   Polyline,
   Region
 } from 'react-native-maps'
-import { Colors, View } from 'react-native-ui-lib'
+import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
 import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
 import { SplashScreen, router } from 'expo-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -172,7 +172,7 @@ export default function MainScreen() {
     }
   }, [map.current, location, initialRegion, origin])
 
-  if (!initialRegion) return null
+  if (!initialRegion) return <LoaderScreen />
 
   return (
     <SafeAreaView style={{ flex: 1, paddingTop: 60 }}>
@@ -187,7 +187,6 @@ export default function MainScreen() {
         toolbarEnabled={false}
         showsCompass={false}
         onRegionChangeComplete={handleRegionChangeComplete}
-        onMapLoaded={SplashScreen.hideAsync}
       >
         {!driveRequest &&
           serviceSpots?.map((serviceSpot) => (

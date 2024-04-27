@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useRef } from 'react'
 import { useAuth0 } from 'react-native-auth0'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {
@@ -14,7 +14,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import PhoneNumberMask from '../components/PhoneNumberMask'
 import { THAI_DIAL_CODE, THAI_PHONE_NUMBER_LENGTH } from '@/constants/phone'
 import TextFieldError from '../components/TextFieldError'
-import { SplashScreen, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 
 const validationSchema = yup.object().shape({
   phoneNumber: yup
@@ -52,10 +52,6 @@ export default function LoginScreen() {
     }
   })
 
-  const onLayoutLoaded = useCallback(() => {
-    SplashScreen.hideAsync()
-  }, [])
-
   return (
     <SafeAreaView
       style={{
@@ -64,7 +60,6 @@ export default function LoginScreen() {
         padding: 24,
         gap: 20
       }}
-      onLayout={onLayoutLoaded}
     >
       <View centerV gap-20 height="100%">
         <Text h1B center>
