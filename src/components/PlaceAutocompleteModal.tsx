@@ -124,11 +124,9 @@ export default function PlaceAutocompleteModal({
             key: 'AIzaSyDMcuFdAqM9SvGP0D5ImQ7b8sZ0SDzFBJo',
             language: 'th',
             components: 'country:th',
-            strictbounds: true,
             location: location
               ? `${location.coords.latitude},${location.coords.longitude}`
               : undefined,
-            radius: MAX_DISTANCE_METERS,
             sessiontoken: autocompleteSessionToken
           }}
           onFail={(error) => console.error(error)}

@@ -29,7 +29,7 @@ export default function ServiceSpots() {
   })
 
   const handleItemPress: ServiceSpotListItemPressHandler = (serviceSpot) => {
-    router.push(`/(protected)/service-spots/${serviceSpot.id}`)
+    router.navigate(`/(protected)/service-spots/${serviceSpot.id}`)
   }
 
   const onRefresh = useCallback(async () => {

@@ -5,6 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useMemo } from 'react'
 import { ActivityIndicator } from 'react-native'
+import { RefreshControl } from 'react-native-gesture-handler'
 import { Colors, LoaderScreen, View } from 'react-native-ui-lib'
 
 export default function DriveRequestsScreen() {
@@ -12,7 +13,8 @@ export default function DriveRequestsScreen() {
     data: driveRequests,
     isFetching,
     hasNextPage,
-    fetchNextPage
+    fetchNextPage,
+    refetch: refetchDriveRequests
   } = useInfiniteQuery({
     queryKey: ['drive-requests'],
     queryFn: ({ pageParam }) =>
@@ -43,6 +45,12 @@ export default function DriveRequestsScreen() {
           padding: 10
         },
         snapToEnd: true,
+        refreshControl: (
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={refetchDriveRequests}
+          />
+        ),
         ListFooterComponent: () =>
           hasNextPage && (
             <View center paddingV-20>
@@ -56,7 +64,7 @@ export default function DriveRequestsScreen() {
           )
       }}
       onDriveRequestPress={(driveRequest) =>
-        router.push(`/drive-requests/${driveRequest.id}`)
+        router.navigate(`/drive-requests/${driveRequest.id}`)
       }
       onEndReached={() => !isFetching && fetchNextPage()}
     />

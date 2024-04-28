@@ -19,7 +19,7 @@ function ServiceSpotMarker({ data, visibility = true, ...props }: Props) {
       >
         {data && (
           <Callout
-            onPress={() => router.push(`/service-spots/${data.id}`)}
+            onPress={() => router.navigate(`/service-spots/${data.id}`)}
             tooltip
           >
             <ServiceSpotCallout serviceSpot={data} />

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, {
+  Circle,
   Details,
   MapMarker,
   Marker,
@@ -128,7 +129,7 @@ export default function MainScreen() {
   }, [driveRequest?.driver.phoneNumber])
 
   const handleChatBubblePressed = useCallback(() => {
-    router.push('/drive-request/chat')
+    router.navigate('/drive-request/chat')
     setHasNewChatMessage(false)
   }, [])
 
