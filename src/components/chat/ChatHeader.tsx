@@ -1,7 +1,7 @@
 import { router } from 'expo-router'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Colors, View, Image, Text } from 'react-native-ui-lib'
+import { Button, Colors, View, Image, Text, Avatar } from 'react-native-ui-lib'
 import { Ionicons } from '@expo/vector-icons'
 
 type Props = {
@@ -24,10 +24,7 @@ export default function ChatHeader({ title, image, description }: Props) {
           <Ionicons name="arrow-back" size={24} color={Colors.black} />
         </Button>
         <View row gap-10 centerV>
-          <Image
-            src={image}
-            style={{ width: 40, height: 40, borderRadius: 40 }}
-          />
+          <Avatar source={{ uri: image }} size={40} />
           <View>
             <Text h5B>{title}</Text>
             <Text caption>{description}</Text>
