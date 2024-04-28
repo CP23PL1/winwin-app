@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { View, Text, TextField, Button } from 'react-native-ui-lib'
+import { View, TextField, Colors } from 'react-native-ui-lib'
 import { Redirect, Stack } from 'expo-router'
-import { Entypo } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { useDriveRequestContext } from '@/contexts/DriveRequestContext'
 import { driveRequestSocket } from '@/sockets/drive-request'
 
 import ChatHeader from '@/components/chat/ChatHeader'
 import ChatMessageList from '@/components/chat/ChatMessageList'
+import { TouchableOpacity } from 'react-native'
 
 export default function DriveRequestChat() {
   const { driveRequest, setHasNewChatMessage } = useDriveRequestContext()
@@ -76,12 +77,7 @@ export default function DriveRequestChat() {
         }}
       />
       <ChatMessageList user={driveRequest.user} messages={messages} />
-      <View row bg-white width={'100%'} paddingV-10>
-        <View flex-1 center paddingH-15>
-          <Button none>
-            <Entypo name="image-inverted" size={35} color="#DEDEDE" />
-          </Button>
-        </View>
+      <View row bg-white padding-10 center>
         <View flex-8 centerV>
           <TextField
             containerStyle={{
@@ -97,15 +93,15 @@ export default function DriveRequestChat() {
             value={text}
           />
         </View>
-        <View flex-1 paddingL-5 paddingR-15 centerV>
-          <Button
-            none
-            avoidMinWidth
-            avoidInnerPadding
+        <View centerV paddingH-15>
+          <Ionicons
+            name="send"
+            size={24}
+            style={{ opacity: text ? 1 : 0.5 }}
+            color={text ? Colors.$iconPrimary : Colors.$iconNeutral}
             onPress={() => sendChatMessage(text)}
-          >
-            <Text bodyB>ส่ง</Text>
-          </Button>
+            disabled={!text}
+          />
         </View>
       </View>
     </View>

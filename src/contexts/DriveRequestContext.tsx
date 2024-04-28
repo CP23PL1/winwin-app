@@ -111,8 +111,7 @@ export default function DriveRequestContextProvider({ children }: Props) {
     Toast.show({
       type: 'success',
       text1: 'เดินทางสำเร็จ',
-      text2: 'ขอบคุณที่ใช้บริการของเรา',
-      visibilityTime: 6000
+      text2: 'ขอบคุณที่ใช้บริการของเรา'
     })
     router.replace('/drive-request/feedback')
   }, [])
@@ -140,6 +139,10 @@ export default function DriveRequestContextProvider({ children }: Props) {
     },
     [reset]
   )
+
+  const handleGetDriveRequest = useCallback((data: DriveRequest) => {
+    setDriveRequest(data)
+  }, [])
 
   // Handle socket io events on mount with cleanup
   useEffect(() => {
@@ -175,6 +178,12 @@ export default function DriveRequestContextProvider({ children }: Props) {
     setDriveRequest,
     handleException
   ])
+
+  useEffect(() => {
+    driveRequestSocket
+      .emitWithAck('get-drive-request')
+      .then(handleGetDriveRequest)
+  }, [])
 
   // Handle socket io connection on mount with cleanup
   useEffect(() => {

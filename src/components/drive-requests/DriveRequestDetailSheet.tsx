@@ -60,6 +60,10 @@ export default function DriveRequestDetailSheet({
           />
           <View gap-5>
             <View row centerV spread>
+              <Text caption>จาก</Text>
+              <Text caption>{driveRequest.driver.serviceSpot.name}</Text>
+            </View>
+            <View row centerV spread>
               <Text caption>รหัสเรียกรถ</Text>
               <Text caption>{driveRequest?.id}</Text>
             </View>
@@ -70,7 +74,7 @@ export default function DriveRequestDetailSheet({
               </Text>
             </View>
             <View row centerV spread>
-              <Text caption>ค่าโดยสารตามอัตรา</Text>
+              <Text caption>ค่าโดยสาร (ตามอัตรา)</Text>
               <Text caption>
                 {commonUtil.formatCurrency(driveRequest.priceByDistance)}
               </Text>

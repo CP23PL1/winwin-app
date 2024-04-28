@@ -268,6 +268,9 @@ export default function MainScreen() {
           />
           <MapSettingMenu
             style={styles.mapSettingMenu}
+            onPressCurrentLocation={() =>
+              map.current?.animateToRegion(initialRegion)
+            }
             onToggleMapMarker={setShowServiceSpotMarkers}
           />
         </>

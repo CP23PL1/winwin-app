@@ -8,6 +8,10 @@ class CommonUtil {
     })
     return nf.format(value)
   }
+
+  formatPhoneNumber(phoneNumber: string) {
+    return phoneNumber.replace(/\+66/g, '0')
+  }
 }
 
 export const commonUtil = new CommonUtil()

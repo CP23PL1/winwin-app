@@ -1,21 +1,16 @@
 import { Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Alert, Linking, StyleSheet, ScrollView } from 'react-native'
-import {
-  View,
-  Text,
-  LoaderScreen,
-  Button,
-  Image,
-  Colors,
-  Avatar
-} from 'react-native-ui-lib'
-import MapView, { Marker } from 'react-native-maps'
+import { View, Text, LoaderScreen, Button } from 'react-native-ui-lib'
+import MapView from 'react-native-maps'
 import { useQuery } from '@tanstack/react-query'
 import { serviceSpotsApi } from '@/apis/service-spots'
-import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  FontAwesome5,
+  MaterialCommunityIcons,
+  SimpleLineIcons
+} from '@expo/vector-icons'
 import ImageViewerModal from '@/components/ImageViewerModal'
-import CardModal from '@/components/CardModal'
 import ServiceSpotMarker from '@/components/service-spots/ServiceSpotMarker'
 import DriverInfo from '@/components/drive-requests/DriverInfo'
 
@@ -27,7 +22,6 @@ function ServiceSpotDetail() {
   const { slug } = useLocalSearchParams<Params>()
   const serviceSpotId = useMemo(() => parseInt(slug!), [slug])
   const [showPriceRateImageModal, setShowPriceRateImageModal] = useState(false)
-  const [showSpotOwnerModal, setShowSpotOwnerModal] = useState(false)
 
   const { data: serviceSpot } = useQuery({
     queryKey: ['service-spots', serviceSpotId],
@@ -56,10 +50,6 @@ function ServiceSpotDetail() {
     await Linking.openURL(url)
   }, [serviceSpot?.coords.lat, serviceSpot?.coords.lng])
 
-  const showWinWinCard = () => {
-    setShowSpotOwnerModal(true)
-  }
-
   return (
     <View flex-1 height="100%">
       <Stack.Screen
@@ -78,70 +68,6 @@ function ServiceSpotDetail() {
               imageUrls: [{ url: serviceSpot.priceRateImageUrl }]
             }}
           />
-          <CardModal
-            visible={showSpotOwnerModal}
-            onRequestClose={() => setShowSpotOwnerModal(false)}
-          >
-            <View center>
-              <Text h1B white>
-                บัตร WinWin
-              </Text>
-            </View>
-            <View center>
-              <Image
-                borderRadius={100}
-                style={{ height: 150, width: 150 }}
-                src={serviceSpot.serviceSpotOwner.info.profileImage}
-              />
-              {serviceSpot.serviceSpotOwner.info.profileImage !== null ? (
-                <Avatar
-                  source={{
-                    uri: serviceSpot.serviceSpotOwner.info.profileImage
-                  }}
-                  size={52}
-                />
-              ) : (
-                <View
-                  backgroundColor={Colors.$backgroundPrimaryMedium}
-                  br100
-                  center
-                  width={52}
-                  height={52}
-                >
-                  <FontAwesome5
-                    name="user-alt"
-                    size={22}
-                    color={Colors.$iconPrimary}
-                  />
-                </View>
-              )}
-            </View>
-            <View paddingV-10 center>
-              <Text h4B white>
-                {serviceSpot.serviceSpotOwner.info.firstName}{' '}
-                {serviceSpot.serviceSpotOwner.info.lastName}
-              </Text>
-            </View>
-            <View paddingV-10 center>
-              <Text h4B white>
-                {serviceSpot.serviceSpotOwner.phoneNumber.replace(/\+66/g, '0')}
-              </Text>
-            </View>
-            <View paddingV-10 center>
-              <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.info.vehicle.manufactor}{' '}
-                {serviceSpot.serviceSpotOwner.info.vehicle.model}
-              </Text>
-            </View>
-            <View paddingV-10 center>
-              <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.info.vehicle.plate}
-              </Text>
-              <Text h4B white center>
-                {serviceSpot.serviceSpotOwner.info.vehicle.province}
-              </Text>
-            </View>
-          </CardModal>
           <ScrollView>
             <View flex-1>
               <MapView
@@ -217,17 +143,20 @@ function ServiceSpotDetail() {
                     </Button>
                   </View>
                 </View>
-                <View paddingV-5>
+                <View paddingV-5 gap-10>
                   <Text bodyB>ผู้ดูแล</Text>
-                  <View row paddingV-10 paddingL-10>
-                    <Button
-                      bg-transparent
-                      avoidMinWidth
-                      avoidInnerPadding
-                      onPress={() => showWinWinCard()}
-                    >
-                      <DriverInfo driver={serviceSpot.serviceSpotOwner.info} />
-                    </Button>
+                  <View row centerV spread>
+                    <DriverInfo driver={serviceSpot.serviceSpotOwner.info} />
+                    <SimpleLineIcons
+                      name="phone"
+                      size={24}
+                      style={{ padding: 15 }}
+                      onPress={() =>
+                        Linking.openURL(
+                          `tel:${serviceSpot.serviceSpotOwner.info?.phoneNumber}`
+                        )
+                      }
+                    />
                   </View>
                 </View>
                 {/* <View paddingV-10>

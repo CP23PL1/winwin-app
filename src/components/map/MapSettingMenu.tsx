@@ -6,9 +6,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 type Props = {
   style?: StyleProp<ViewStyle>
   onToggleMapMarker: (state: boolean) => void
+  onPressCurrentLocation: () => void
 }
 
-export default function MapSettingMenu({ style, onToggleMapMarker }: Props) {
+export default function MapSettingMenu({
+  style,
+  onToggleMapMarker,
+  onPressCurrentLocation
+}: Props) {
   const [isMapMarkerVisible, setIsMapMarkerVisible] = useState(true)
 
   const handleToggleMapMarker = useCallback(() => {
@@ -27,6 +32,16 @@ export default function MapSettingMenu({ style, onToggleMapMarker }: Props) {
           color={isMapMarkerVisible ? Colors.$iconDanger : Colors.blue40}
         />
       </Pressable>
+      <View
+        style={{ width: '100%', height: 1, backgroundColor: Colors.grey50 }}
+      />
+      <Pressable onPress={onPressCurrentLocation}>
+        <MaterialCommunityIcons
+          name="crosshairs-gps"
+          size={24}
+          color={Colors.blue40}
+        />
+      </Pressable>
     </View>
   )
 }
@@ -36,6 +51,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 10,
     borderRadius: 10,
-    elevation: 10
+    elevation: 10,
+    gap: 10
   }
 })
